@@ -14,7 +14,9 @@ await esbuild.build({
   entryPoints: ["src/ssr.ts"], outfile: ".build/ssr.mjs", bundle: true, format: "esm", platform: "node", target: "node20", logLevel: "warning",
   plugins: [ssrPlugin()], mainFields: ["svelte", "module", "main"], conditions: ["svelte"],
 });
-const { body } = await import(`./.build/ssr.mjs?${Date.now()}`);
+const { body, missing } = await import(`./.build/ssr.mjs?${Date.now()}`);
+// Unfilled numbers still build (they render as highlighted gaps) so previews work; `npm run check` is what blocks a merge.
+if (missing.length) console.warn(`\n⚠  ${missing.length} metrics not filled in src/metrics.ts: ${missing.join(", ")}\n`);
 
 await esbuild.build({
   entryPoints: ["src/main.ts"], outfile: "assets/site.js", bundle: true, format: "iife", target: "es2020", minify: true, logLevel: "info",
