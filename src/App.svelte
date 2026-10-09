@@ -124,7 +124,25 @@
   $: tl && (paused ? tl.pause() : tl.play());
   const reduce = typeof matchMedia !== "undefined" && matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  function go(id: string) { document.getElementById(id)?.scrollIntoView({ behavior: reduce ? "auto" : "smooth" }); }
+  const PATHS: Record<string, string> = { main: "/", about: "/about/", experience: "/experience/", education: "/education/", skills: "/skills/", contact: "/contact/" };
+  const TITLES: Record<string, string> = { main: "Claire Knorr | Product Manager", about: "About | Claire Knorr", experience: "Experience | Claire Knorr", education: "Education | Claire Knorr", skills: "Skills | Claire Knorr", contact: "Contact | Claire Knorr" };
+  const idFromPath = (p: string) => Object.keys(PATHS).find(k => PATHS[k] === (p.endsWith("/") ? p : p + "/")) ?? "main";
+  function show(id: string, smooth: boolean) {
+    if (id === "education") { const d = document.querySelector<HTMLDetailsElement>(".more"); if (d) d.open = true; }
+    const behavior = smooth && !reduce ? "smooth" : "auto";
+    if (id === "main") window.scrollTo({ top: 0, behavior }); else document.getElementById(id)?.scrollIntoView({ behavior });
+  }
+  // Clean URLs: scroll to the section, then update the address bar (/experience/ instead of /#experience).
+  function go(id: string) {
+    show(id, true);
+    try { if (location.pathname !== PATHS[id]) history.pushState({}, "", PATHS[id]); } catch { /* file:// previews */ }
+    document.title = TITLES[id];
+  }
+  function nav(e: MouseEvent) {
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return; // let "open in new tab" work normally
+    e.preventDefault(); go(idFromPath((e.currentTarget as HTMLAnchorElement).pathname));
+  }
+  function skipToMain(e: Event) { e.preventDefault(); document.getElementById("main")?.focus(); }
   const commands: Cmd[] = [
     { label: "Go to Experience", hint: "section", action: () => go("experience") },
     { label: "Go to About", hint: "section", action: () => go("about") },
@@ -155,6 +173,15 @@
   function redact(s: string) { return s.split(/(XX[%+K]?)/g).map(p => ({ t: p, r: /^XX/.test(p) })); }
 
   onMount(() => {
+    const landing = idFromPath(location.pathname);
+    if (landing !== "main") {
+      document.title = TITLES[landing];
+      const land = () => { ScrollTrigger.refresh(); show(landing, false); };
+      addEventListener("load", () => setTimeout(land, 150), { once: true });
+      if (document.readyState === "complete") setTimeout(land, 150);
+    }
+    const pop = () => { const id = idFromPath(location.pathname); document.title = TITLES[id]; show(id, false); };
+    addEventListener("popstate", pop);
     if (!reduce) {
       tl = gsap.timeline({ repeat: -1, yoyo: true, defaults: { duration: 3.2, ease: "sine.inOut" } });
       tl.to(blobPath, { attr: { d: shapes[1] } }).to(blobPath, { attr: { d: shapes[2] } }).to(blobPath, { attr: { d: shapes[0] } });
@@ -167,23 +194,23 @@
         trigger: pinWrap, start: "top top", end: () => "+=" + dist(), pin: true, scrub: reduce ? true : 0.6, invalidateOnRefresh: true,
         onUpdate: s => (progress = s.progress) } });
     });
-    return () => { tl?.kill(); mm.revert(); ScrollTrigger.getAll().forEach(t => t.kill()); };
+    return () => { removeEventListener("popstate", pop); tl?.kill(); mm.revert(); ScrollTrigger.getAll().forEach(t => t.kill()); };
   });
 </script>
 
 <svelte:window on:keydown={key} />
 
-<a class="skip" href="#main">Skip to main content</a>
+<a class="skip" href="#main" on:click={skipToMain}>Skip to main content</a>
 
 <header class="nav-wrap">
   <nav class="nav" aria-label="Main">
-    <a class="brand" href="#main">Claire Knorr<small>Product Manager</small></a>
+    <a class="brand" href="/" on:click={nav}>Claire Knorr<small>Product Manager</small></a>
     <ul>
-      <li><a href="#about">About</a></li><li><a href="#experience">Experience</a></li><li><a href="#skills">Skills</a></li>
+      <li><a href="/about/" on:click={nav}>About</a></li><li><a href="/experience/" on:click={nav}>Experience</a></li><li><a href="/skills/" on:click={nav}>Skills</a></li>
       <li><button class="kbd" on:click={open} aria-keyshortcuts="Control+K Meta+K" aria-haspopup="dialog"><span>Search</span><kbd aria-hidden="true">{isMac ? "⌘K" : "Ctrl K"}</kbd></button></li>
       <li class="soc"><a href="https://linkedin.com/in/claire-knorr" target="_blank" rel="noopener noreferrer">LinkedIn</a></li>
       <li class="soc"><a href="https://github.com/claireokay" target="_blank" rel="noopener noreferrer">GitHub</a></li>
-      <li><a class="cta" href="#contact">Connect</a></li>
+      <li><a class="cta" href="/contact/" on:click={nav}>Connect</a></li>
     </ul>
   </nav>
 </header>
@@ -191,10 +218,10 @@
 <main id="main" tabindex="-1">
   <section class="hero">
     <div class="copy">
-      <p class="hero-in avatar"><img src="assets/images/claire-headshot.jpg" alt="" /> Claire Knorr · open to product roles</p>
+      <p class="hero-in avatar"><img src="/assets/images/claire-headshot.jpg" alt="" /> Claire Knorr · open to product roles</p>
       <h1 class="hero-in">Product manager for 0-1 platforms and AI-powered enterprise workflows.</h1>
       <p class="hero-in lede">I own a licensing and credit platform at Palo Alto Networks, from usage metering to an LLM feature that summarizes activation failures and opens support cases before customers ask.</p>
-      <div class="hero-in actions"><a class="btn solid" href="#experience">See my experience</a><button class="btn" on:click={open}>Search my work <kbd aria-hidden="true">{isMac ? "⌘K" : "Ctrl K"}</kbd></button></div>
+      <div class="hero-in actions"><a class="btn solid" href="/experience/" on:click={nav}>See my experience</a><button class="btn" on:click={open}>Search my work <kbd aria-hidden="true">{isMac ? "⌘K" : "Ctrl K"}</kbd></button></div>
     </div>
     <div class="hero-in map" class:fixed={view === "list" && mapH > 0} style={view === "list" && mapH > 0 ? `height:${mapH}px` : ""} bind:offsetHeight={boxH} role="region" aria-label="Interactive map of the platform Claire built">
       <div class="cap"><h2 class="capt">The platform I built</h2>
@@ -242,7 +269,7 @@
         <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#c9b3f0"/><stop offset="1" stop-color="#ffb8d9"/></linearGradient>
           <clipPath id="clip"><path bind:this={blobPath} d={shapes[0]} /></clipPath></defs>
         <g clip-path="url(#clip)"><rect width="600" height="580" fill="url(#g)"/>
-          <image href="assets/images/claire-headshot.jpg" x="30" y="20" width="540" height="540" preserveAspectRatio="xMidYMid slice"/></g>
+          <image href="/assets/images/claire-headshot.jpg" x="30" y="20" width="540" height="540" preserveAspectRatio="xMidYMid slice"/></g>
       </svg>
       <button class="pausebtn under" on:click={() => (paused = !paused)} aria-pressed={paused}>
         <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">{#if paused}<path d="M4 2.5v11l9-5.5z" fill="currentColor"/>{:else}<rect x="3" y="2.5" width="3.5" height="11" rx="1" fill="currentColor"/><rect x="9.5" y="2.5" width="3.5" height="11" rx="1" fill="currentColor"/>{/if}</svg>
