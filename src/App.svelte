@@ -391,8 +391,8 @@
   .nav ul { display: flex; align-items: center; gap: .25rem; }
   .nav li a { display: inline-block; padding: .45rem .9rem; border-radius: 999px; color: var(--plum); text-decoration: none; font-weight: 600; }
   .nav li a.cta { background: var(--plum); color: #fff; }
-  .kbd { font: inherit; font-weight: 600; display: inline-flex; gap: .6rem; align-items: center; padding: .4rem .5rem .4rem .9rem; border: 2px solid var(--line); background: #fff; border-radius: 999px; color: var(--plum-soft); cursor: pointer; }
-  kbd { font-family: var(--body); font-weight: 700; font-size: .78rem; background: var(--lilac-wash); border: 1px solid var(--line); border-radius: 8px; padding: .1rem .45rem; color: var(--plum); }
+  .kbd { font: inherit; font-weight: 600; font-size: .95rem; line-height: 1.3; display: inline-flex; gap: .5rem; align-items: center; padding: .3rem .4rem .3rem .85rem; border: 2px solid var(--line); background: #fff; border-radius: 999px; color: var(--plum-soft); cursor: pointer; }
+  kbd { font-family: var(--body); font-weight: 700; font-size: .68rem; line-height: 1.5; letter-spacing: .02em; background: var(--lilac-wash); border: 1px solid var(--line); border-radius: 6px; padding: 0 .35rem; color: var(--plum-soft); }
   .hero { min-height: 100vh; display: grid; grid-template-columns: .95fr 1.05fr; align-items: center; gap: 2rem; width: min(100% - 2.5rem, 1180px); margin: 0 auto; padding-top: 5rem; }
   h1 { font-size: clamp(2.2rem, 4.4vw, 3.5rem); letter-spacing: -.02em; margin-bottom: 1.25rem; }
   .lede { font-size: 1.2rem; color: var(--plum-soft); max-width: 34rem; }
