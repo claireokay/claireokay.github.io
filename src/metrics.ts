@@ -1,5 +1,6 @@
 // Every number on the site lives here. Write each value exactly as it should read, units included: "12", "40+", "99.5%", "30K".
-// A null value shows up in previews as a highlighted gap, `npm run build` lists it, and `npm run check` fails until it is filled.
+// A null value shows up in previews as a highlighted [key], `npm run build` lists it, and `npm run check` fails until it is filled.
+// `what` is a note for whoever fills it in; it is not shown on the site.
 export type Metric = { v: string | null; what: string };
 
 export const M = {
@@ -49,6 +50,7 @@ export function fill(s: string): { t: string; todo: boolean }[] {
     if (i % 2 === 0) return { t: part, todo: false };
     const m = (M as Record<string, Metric>)[part];
     if (!m) throw new Error(`Unknown metric {${part}} in: ${s}`);
-    return m.v === null ? { t: `[${m.what}]`, todo: true } : { t: m.v, todo: false };
+    // A gap shows its key, so the preview points straight at the line to fill in below.
+    return m.v === null ? { t: `[${part}]`, todo: true } : { t: m.v, todo: false };
   });
 }

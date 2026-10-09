@@ -102,7 +102,6 @@
   let narrow = false;
   $: view = userView ?? (narrow ? "list" : "map");
   $: if (view === "map" && boxH) mapH = boxH;
-  let paused = false;
   let opener: HTMLElement | null = null;
   let isMac = false;
   const reduce = typeof matchMedia !== "undefined" && matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -157,7 +156,6 @@
   onMount(() => {
     gsap.registerPlugin(ScrollTrigger);
     isMac = /Mac|iPhone|iPad/.test(navigator.platform);
-    paused = reduce;
     const mq = matchMedia("(max-width: 600px)"); narrow = mq.matches;
     const onMq = () => (narrow = mq.matches); mq.addEventListener("change", onMq);
     const landing = idFromPath(location.pathname);
@@ -239,6 +237,7 @@
           <h3>{r.title}</h3>
           <p class="org">{r.org}</p>
           <ul>{#each r.points as p}<li>{#each fill(p) as seg}{#if seg.todo}<mark class="todo">{seg.t}</mark>{:else}{seg.t}{/if}{/each}</li>{/each}</ul>
+          {#if r.id === "panw"}<p class="more-link"><a href="#platform" on:click|preventDefault={() => show("platform", true)}>How the platform fits together ↓</a></p>{/if}
           <ul class="chips">{#each r.tags as t}<li>{t}</li>{/each}</ul>
         </article>
       {/each}
@@ -246,49 +245,46 @@
   </section>
 
   <section id="platform" class="platform wrap">
-    <div class="map" data-view={userView} class:fixed={view === "list" && mapH > 0} style={view === "list" && mapH > 0 ? `height:${mapH}px` : ""} bind:offsetHeight={boxH} role="region" aria-label="Interactive map of the platform Claire built">
-      <div class="cap"><h2 class="capt">The platform I built</h2>
-        <span class="ctrls"><button class="pausebtn" on:click={() => (paused = !paused)} aria-pressed={paused}>
-        <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">{#if paused}<path d="M4 2.5v11l9-5.5z" fill="currentColor"/>{:else}<rect x="3" y="2.5" width="3.5" height="11" rx="1" fill="currentColor"/><rect x="9.5" y="2.5" width="3.5" height="11" rx="1" fill="currentColor"/>{/if}</svg>
-        <span>{paused ? "Play" : "Pause"}<span class="sr"> animation</span></span></button><span class="seg" role="group" aria-label="View"><button aria-pressed={view === "map"} on:click={() => (userView = "map")}>Map</button><button aria-pressed={view === "list"} on:click={() => (userView = "list")}>List</button></span></span></div>
+    <!-- TODO(claire): confirm the title ("I own" replaced "I built") and that this section is fine to publish under Palo Alto Networks policy. -->
+    <div class="plat-head">
+      <div><h2>The platform I own</h2>
+        <p>How the parts I work on at Palo Alto Networks connect, from a trial request through activation to billing.</p></div>
+      <span class="seg" role="group" aria-label="View"><button aria-pressed={view === "map"} on:click={() => (userView = "map")}>Map</button><button aria-pressed={view === "list"} on:click={() => (userView = "list")}>List</button></span>
+    </div>
+    <div class="map" data-view={userView} class:fixed={view === "list" && mapH > 0} style={view === "list" && mapH > 0 ? `height:${mapH}px` : ""} bind:offsetHeight={boxH} role="region" aria-label="Diagram of the platform Claire owns">
       <div class="listview">
         <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
         <div class="plwrap" tabindex="0" role="region" aria-label="Platform parts, scrollable"><ul class="plist">{#each gnodes as n}<li><h3>{n.title}</h3><p>{#each fill(n.text) as seg}{#if seg.todo}<mark class="todo">{seg.t}</mark>{:else}{seg.t}{/if}{/each}</p></li>{/each}</ul></div>
       </div>
       <div class="mapview">
       <p class="sr" id="flowdesc">{FLOW_TEXT}</p>
-      <p class="hint" id="maphint">Select a part to read about it. Use Tab to move between parts, and Enter or Space to select.</p>
+      <p class="hint" id="maphint">Select a part to read about it.<span class="sr"> Use Tab to move between parts, and Enter or Space to select.</span></p>
+      <div class="mapgrid">
       <svg viewBox="0 0 {W} {H}" role="group" aria-label="Platform diagram" aria-describedby="maphint flowdesc">
         <defs>
           <marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M1,1 L9,5 L1,9 Z" fill="#9b80d8"/></marker>
           <marker id="ahh" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M1,1 L9,5 L1,9 Z" fill="#7d55c7"/></marker>
         </defs>
-        {#each glinks as l, i}
+        {#each glinks as l}
           {@const hot = l.source.id === selected || l.target.id === selected}
           <path d={l.d} fill="none" stroke={hot ? "#7d55c7" : "#9b80d8"} stroke-width={hot ? 3 : 2} stroke-linecap="round" marker-end={hot ? "url(#ahh)" : "url(#ah)"} />
-          {#if !paused}{#each [0, 1] as k}
-            {@const dur = 3 + (i % 3) * 0.5}
-            <!-- Dots travel 90% of each arrow (stopping before the arrowhead) and fade in and out, so none pop or pile up on a circle. -->
-            <circle class="dot" r={hot ? 4.5 : 3.5} fill={hot ? "#2d1b4e" : "#7d55c7"} stroke="#fff" stroke-width="1.5" opacity="0">
-              <animateMotion dur="{dur}s" begin="{-(k * dur) / 2 - i * 0.7}s" repeatCount="indefinite" path={l.d} keyPoints="0;0.9" keyTimes="0;1" calcMode="linear" />
-              <animate attributeName="opacity" dur="{dur}s" begin="{-(k * dur) / 2 - i * 0.7}s" repeatCount="indefinite" values="0;1;1;0" keyTimes="0;0.15;0.8;1" />
-            </circle>{/each}{/if}
         {/each}
-        {#each gnodes as n, i}
+        {#each gnodes as n}
           {@const sel = n.id === selected}
           <!-- svelte-ignore a11y-click-events-have-key-events -->
           <g class="node" class:sel role="button" tabindex="0" aria-pressed={sel} aria-label={n.label} transform="translate({n.x},{n.y})" on:click={() => (selected = n.id)} on:keydown={e => nodeKey(e, n.id)}>
-            <g class="bob" class:still={paused} style="animation-delay:{-i * 0.7}s"><g class="body">
+            <g class="body">
               <circle class="ring" r={n.r + 9} fill="none" stroke="#2d1b4e" stroke-width="3" stroke-dasharray="6 5" />
               <circle r={n.r} cx="0" cy={sel ? 7 : 5} fill={sel ? "#2d1b4e" : "#c9b3f0"} />
               <circle class="main" r={n.r} fill={FILL[n.tone]} stroke="#2d1b4e" stroke-width={sel ? 3.5 : 2.5} />
               {#if n.id === "platform"}<circle r={n.r - 11} fill="none" stroke="#fbf7ff" stroke-width="2" stroke-dasharray="3 6" opacity=".8" />{/if}
-            </g><text y={n.r + 19}>{n.label}</text></g>
+            </g><text y={n.r + 19}>{n.label}</text>
           </g>
         {/each}
       </svg>
       <div class="panel" aria-live="polite"><h3>{active.title}</h3>
         <p>{#each fill(active.text) as seg}{#if seg.todo}<mark class="todo">{seg.t}</mark>{:else}{seg.t}{/if}{/each}</p></div>
+      </div>
       </div>
     </div>
   </section>
@@ -398,19 +394,16 @@
   @media (max-width: 899px) { .hero { grid-template-columns: 1fr; } .track { flex-direction: column; width: auto; padding: 0 1.25rem; } .card { width: auto; } .pin { height: auto; } .nav li:nth-child(-n+2) { display: none; } }
 
   .map { background: #fff; border: 2px solid var(--plum); border-radius: 36px 36px 36px 10px; padding: 1rem 1rem .5rem; }
-  .cap { font-weight: 700; color: var(--plum-soft); font-size: .92rem; padding: .1rem .6rem .2rem; display: flex; justify-content: space-between; gap: 1rem; }
   .map svg { width: 100%; height: auto; display: block; overflow: visible; }
   .node { cursor: pointer; outline: none; }
   .node .body { transition: transform .25s cubic-bezier(.2,.8,.2,1); transform-box: fill-box; transform-origin: center; }
   .node:hover .body, .node:focus-visible .body { transform: scale(1.08); }
   .node text { font-family: var(--body); font-weight: 700; font-size: 13.5px; fill: var(--plum); paint-order: stroke; stroke: #fff; stroke-width: 4px; stroke-linejoin: round; text-anchor: middle; pointer-events: none; }
-  @keyframes bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
-  .bob { animation: bob 5s ease-in-out infinite; }
   .panel { margin: .4rem .4rem .8rem; padding: 1rem 1.2rem 1.05rem; background: var(--lilac-wash); border-radius: 22px 22px 22px 8px; min-height: 8.2rem; }
   .panel h3 { font-size: 1.3rem; margin-bottom: .35rem; } .panel p { margin: 0 0 .5rem; color: var(--plum-soft); font-size: 1rem; }
   .about { padding: 4rem 0; } .about h2 { margin-bottom: 1rem; } .about-copy { max-width: 44rem; } .about p { color: var(--plum-soft); font-size: 1.1rem; }
   .hero h1 { font-size: clamp(2.1rem, 3.9vw, 3.15rem); }
-  @media (prefers-reduced-motion: reduce) { .bob { animation: none; } .node .body { transition: none; } }
+  @media (prefers-reduced-motion: reduce) { .node .body { transition: none; } }
   @media (max-width: 760px) { .hero { grid-template-columns: 1fr; gap: 1.5rem; padding-top: 6rem; } .portrait { width: 140px; } }
   .links { display: flex; gap: .75rem; justify-content: center; flex-wrap: wrap; margin-top: 1.25rem; }
   @media (max-width: 899px) { .nav li.soc { display: none; } }
@@ -418,6 +411,10 @@
   .wrap { width: min(100% - 2.5rem, 1180px); margin: 0 auto; }
   .edu h2 { margin-bottom: 1.5rem; }
   .platform { padding: 4rem 0 0; }
+  .plat-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 1.5rem; margin-bottom: 1.25rem; } .plat-head p { margin: .4rem 0 0; color: var(--plum-soft); max-width: 40rem; }
+  .mapgrid { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 1.5rem; align-items: center; }
+  @media (max-width: 899px) { .mapgrid { grid-template-columns: 1fr; } .plat-head { flex-direction: column; align-items: flex-start; } }
+  .more-link { margin: .9rem 0 0; font-weight: 700; } .more-link a { color: var(--lilac-ink); text-underline-offset: 3px; }
   .edu { padding: 5rem 0 2rem; } .panel2 { background: #fff; border: 2px solid var(--plum); border-radius: 28px; padding: 1.75rem; box-shadow: 0 8px 0 var(--lilac); }
   .panel2 .meta { margin: .25rem 0 1rem; color: var(--plum-soft); font-weight: 600; }
   :global(.chips li.ink) { background: var(--plum); color: #fff; border-color: var(--plum); }
@@ -459,16 +456,11 @@
   .hint { margin: .1rem .6rem .3rem; font-size: .9rem; color: var(--plum-soft); font-weight: 600; }
   .node .ring { opacity: 0; } .node:focus-visible .ring { opacity: 1; }
   .node:focus-visible .main { stroke-width: 4; }
-  .bob.still { animation: none; }
   .plist { display: grid; gap: .75rem; padding: .25rem .5rem; margin: .5rem 0 0; list-style: none; }
   .plist li { background: var(--lilac-wash); border-radius: 18px; padding: .8rem 1.1rem; } .plist h3 { font-size: 1.1rem; margin-bottom: .2rem; } .plist p { margin: 0; color: var(--plum-soft); font-size: .98rem; }
   .org, .row dt { color: var(--lilac-ink); }
   @media (max-width: 899px), (max-height: 799px) { .track { flex-direction: column; width: auto; padding: 0 1.25rem; } .card, .card.wide { width: auto; } .card.wide ul:not(.chips) { columns: 1; } .pin { height: auto; min-height: 0; } }
-  .capt { font-family: var(--body); font-variation-settings: normal; font-size: .95rem; font-weight: 700; color: var(--plum-soft); }
   @media (max-width: 420px) { .nav { width: calc(100% - 1.5rem); } .brand { font-size: .95rem; } .kbd { padding: .3rem .55rem; font-size: .85rem; } .nav li a.cta { padding: .4rem .65rem; font-size: .9rem; } }
-  .ctrls { display: inline-flex; align-items: center; gap: .5rem; }
-  .pausebtn { display: inline-flex; align-items: center; gap: .4rem; font: inherit; font-weight: 700; font-size: .85rem; padding: .2rem .8rem; border: 2px solid var(--plum); border-radius: 999px; background: #fff; color: var(--plum); cursor: pointer; }
-  .pausebtn:hover { background: var(--lilac-wash); }
   .map.fixed { display: flex; flex-direction: column; } .map.fixed .plwrap { flex: 1; min-height: 0; overflow-y: auto; }
   .tools { margin: .9rem 0 0; font-size: 1rem; color: var(--plum-soft); } .tools strong { color: var(--plum); }
   .certs { padding: 3rem 0 0; scroll-margin-top: 2rem; } .certs h2 { margin-bottom: 1.25rem; }
@@ -487,7 +479,7 @@
   .map[data-view="map"] .mapview { display: block; } .map[data-view="map"] .listview { display: none; }
   @media (max-width: 600px) { .map:not([data-view]) .mapview { display: none; } .map:not([data-view]) .listview { display: block; } }
   .map.fixed .listview { display: flex; flex-direction: column; flex: 1; min-height: 0; }
-  @media (prefers-reduced-motion: reduce) { .hero-in { animation: none; } .dot { display: none; } }
+  @media (prefers-reduced-motion: reduce) { .hero-in { animation: none; } }
   @media (hover: none), (pointer: coarse) { .kbd kbd { display: none; } .kbd { padding: .3rem .85rem; } }
   .nav .left { display: flex; align-items: center; gap: 1.25rem; min-width: 0; }
   .ico { width: 1.05em; height: 1.05em; margin-right: .4em; vertical-align: -.14em; }
