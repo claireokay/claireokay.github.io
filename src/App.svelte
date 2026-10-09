@@ -431,6 +431,7 @@
   .entry .main strong { display: block; line-height: 1.3; } .entry .main em { display: block; font-style: normal; color: var(--plum-soft); font-weight: 600; font-size: .92rem; }
   .entry .stat { flex: none; background: var(--lilac-wash); border: 1.5px solid var(--line); border-radius: 999px; padding: .15rem .8rem; font-weight: 700; font-size: .85rem; color: var(--plum); white-space: nowrap; }
   .row .chips { margin-top: 0; }
+  .row .chips li { line-height: 1.3; border-radius: 14px; padding: .35rem .8rem; }
   @media (max-width: 760px) { .row { grid-template-columns: 1fr; gap: .6rem; } .entry { flex-direction: column; align-items: flex-start; gap: .35rem; } .entry .stat { white-space: normal; } }
   @media (max-width: 560px) { .brand small { display: none; } .nav li:nth-child(-n+3) { display: none; } .kbd kbd { display: none; } .kbd { padding: .35rem .7rem; font-size: .9rem; } .nav ul { gap: .15rem; } .nav li a.cta { padding: .45rem .8rem; } .brand { font-size: 1.05rem; } .brand { white-space: nowrap; } }
 
