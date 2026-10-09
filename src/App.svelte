@@ -260,9 +260,9 @@
       <p class="meta">B.S. Information Science, Minor in Disability Studies</p>
       <ul class="chips"><li class="ink">Magna Cum Laude</li><li>GPA 3.965 / 4.00</li><li>Grace Hopper Scholar</li></ul>
       <h4>Awards</h4><ul class="tiles">{#each awards as a}<li><strong>{a.t}</strong><span>{a.s}</span><p>{a.n}</p></li>{/each}</ul>
-      <h4>Work during college</h4><ul class="tiles">{#each work as a}<li><strong>{a.t}</strong><span>{a.s}</span>{#if a.n}<p>{a.n}</p>{/if}</li>{/each}</ul>
       <h4>Leadership and teaching</h4><ul class="tiles">{#each lead as a}<li><strong>{a.t}</strong><span>{a.s}</span></li>{/each}</ul>
-      <h4>Honors and clubs</h4><ul class="chips">{#each clubs as c}<li>{c}</li>{/each}</ul>
+      <p class="line"><b>Work during college:</b> {work.map(w => w.t + (w.n ? " (" + w.n.replace("Promoted", "promoted") + ")" : "")).join(" · ")}</p>
+      <p class="line small"><b>Honors and clubs:</b> {clubs.join(" · ")}</p>
     </article>
   </section>
 
@@ -377,4 +377,5 @@
   @media (max-width: 760px) { .tiles { grid-template-columns: 1fr; } }
   .card.wide { width: min(92vw, 940px); } .card.wide ul:not(.chips) { columns: 2; column-gap: 1.75rem; } .card.wide li { break-inside: avoid; }
   @media (max-width: 899px) { .card.wide { width: auto; } .card.wide ul:not(.chips) { columns: 1; } }
+  .panel2 .line { margin: 1.25rem 0 0; color: var(--plum-soft); font-weight: 600; } .panel2 .line b { color: var(--plum); } .panel2 .line.small { font-size: .9rem; margin-top: .6rem; }
 </style>
