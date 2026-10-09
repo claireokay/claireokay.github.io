@@ -33,7 +33,7 @@
   const lead = [
     { t: "Director", s: "Technica, UMD's hackathon for underrepresented genders" },
     { t: "Undergraduate Teaching Assistant", s: "CHSE205 (Disability Studies)" },
-    { t: "Guided Study Sessions (GSS)", s: "INST326" },
+    { t: "Guided Study Sessions (GSS)", s: "INST326: Introduction to Object Oriented Programming" },
   ];
   const clubs = ["Alpha Lambda Delta Honor Society", "Omicron Delta Kappa Honor Society (ODK)", "Maryland Club Figure Skating"];
   type Cmd = { label: string; hint: string; action: () => void };
