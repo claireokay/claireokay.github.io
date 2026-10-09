@@ -218,7 +218,10 @@
       <h1>Claire Knorr</h1>
       <p class="role">Product Manager at Palo Alto Networks · San Francisco Bay Area</p>
       <p class="lede">I own licensing and activation for Palo Alto Networks' cybersecurity products, from the credit platform customers buy with to the usage metering behind their bills.</p>
-      <div class="actions"><a class="btn solid" href="/resume.pdf" target="_blank" rel="noopener">Résumé<span class="sr"> (PDF, opens in new tab)</span></a><a class="btn" href="mailto:clairepknorr@gmail.com">Email me</a></div>
+      <div class="actions"><a class="btn solid" href="/resume.pdf" target="_blank" rel="noopener">Résumé<span class="sr"> (PDF, opens in new tab)</span></a><a class="btn" href="mailto:clairepknorr@gmail.com">Email me</a>
+        <button class="motion" on:click={() => (paused = !paused)} aria-pressed={paused}>
+          <span class="mi" aria-hidden="true"><svg viewBox="0 0 16 16" width="12" height="12"><rect x="3.5" y="2.5" width="3" height="11" rx="1" fill="currentColor"/><rect x="9.5" y="2.5" width="3" height="11" rx="1" fill="currentColor"/></svg></span>
+          <span>Pause motion</span></button></div>
     </div>
   </section>
 
@@ -515,4 +518,9 @@
   .snap:focus-visible, .ctl button:focus-visible { outline: 3px solid var(--lilac-deep); outline-offset: 3px; }
   .about, .exp, .plat, .certs, .edu, .contact { scroll-margin-top: 4rem; }
   @media (prefers-reduced-motion: reduce) { .snap { scroll-behavior: auto; } }
+  .motion { display: inline-flex; align-items: center; gap: .55rem; min-height: 2.75rem; padding: 0 .6rem 0 .3rem; margin-left: .25rem; border: 0; background: none; font: inherit; font-weight: 700; font-size: .95rem; color: var(--plum-soft); cursor: pointer; border-radius: 999px; }
+  .motion .mi { display: grid; place-items: center; width: 1.9rem; height: 1.9rem; border-radius: 50%; background: var(--lilac-wash); border: 1.5px solid var(--line); color: var(--plum); transition: background .2s, color .2s; }
+  .motion:hover { color: var(--plum); } .motion:hover .mi { background: var(--lilac); }
+  .motion[aria-pressed="true"] .mi { background: var(--plum); border-color: var(--plum); color: #fff; }
+  .motion:focus-visible { outline: 3px solid var(--lilac-deep); outline-offset: 2px; }
 </style>
