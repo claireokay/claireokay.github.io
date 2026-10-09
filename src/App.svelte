@@ -1,7 +1,6 @@
 <script lang="ts">
   import { onMount, tick } from "svelte";
   import { gsap } from "gsap";
-  import { ScrollTrigger } from "gsap/ScrollTrigger";
   // Brand icons: Font Awesome Free (CC BY 4.0), https://fontawesome.com/license/free
   import { faGithub, faLinkedin } from "@fortawesome/free-brands-svg-icons";
   const ICONS = { github: faGithub.icon, linkedin: faLinkedin.icon };
@@ -84,9 +83,23 @@
   ];
   let blobPath: SVGPathElement;
   let tl: gsap.core.Timeline | undefined;
-  let track: HTMLDivElement;
-  let pinWrap: HTMLElement;
-  let progress = 0;
+  let snap: HTMLDivElement;
+  let idx = 0;
+  const cardsOf = () => Array.from(snap?.children ?? []) as HTMLElement[];
+  function curIdx() {
+    const cs = cardsOf(); if (!cs.length) return 0;
+    const base = cs[0].offsetLeft; let best = 0, d = Infinity;
+    cs.forEach((c, i) => { const x = Math.abs(c.offsetLeft - base - snap.scrollLeft); if (x < d) { d = x; best = i; } });
+    return best;
+  }
+  function goCard(i: number) {
+    const cs = cardsOf(); const n = Math.max(0, Math.min(cs.length - 1, i));
+    snap.scrollTo({ left: cs[n].offsetLeft - cs[0].offsetLeft, behavior: reduce ? "auto" : "smooth" });
+  }
+  function snapKey(e: KeyboardEvent) {
+    if (e.key === "ArrowRight") { e.preventDefault(); goCard(curIdx() + 1); }
+    else if (e.key === "ArrowLeft") { e.preventDefault(); goCard(curIdx() - 1); }
+  }
   let paletteOpen = false;
   let query = "";
   let input: HTMLInputElement;
@@ -152,7 +165,6 @@
   function redact(s: string) { return s.split(/(XX[%+K]?)/g).map(p => ({ t: p, r: /^XX/.test(p) })); }
 
   onMount(() => {
-    gsap.registerPlugin(ScrollTrigger);
     isMac = /Mac|iPhone|iPad/.test(navigator.platform);
     paused = reduce;
     const mq = matchMedia("(max-width: 600px)"); narrow = mq.matches;
@@ -160,7 +172,7 @@
     const landing = idFromPath(location.pathname);
     if (landing !== "main") {
       document.title = TITLES[landing];
-      const land = () => { ScrollTrigger.refresh(); show(landing, false); };
+      const land = () => show(landing, false);
       addEventListener("load", () => setTimeout(land, 150), { once: true });
       if (document.readyState === "complete") setTimeout(land, 150);
     }
@@ -170,14 +182,7 @@
       tl = gsap.timeline({ repeat: -1, yoyo: true, defaults: { duration: 3.2, ease: "sine.inOut" } });
       tl.to(blobPath, { attr: { d: shapes[1] } }).to(blobPath, { attr: { d: shapes[2] } }).to(blobPath, { attr: { d: shapes[0] } });
     }
-    const mm = gsap.matchMedia();
-    mm.add("(min-width: 900px) and (min-height: 800px)", () => {
-      const dist = () => track.scrollWidth - window.innerWidth + 80;
-      gsap.to(track, { x: () => -dist(), ease: "none", scrollTrigger: {
-        trigger: pinWrap, start: "top top", end: () => "+=" + dist(), pin: true, scrub: reduce ? true : 0.6, invalidateOnRefresh: true,
-        onUpdate: s => (progress = s.progress) } });
-    });
-    return () => { mq.removeEventListener("change", onMq); removeEventListener("popstate", pop); tl?.kill(); mm.revert(); ScrollTrigger.getAll().forEach(t => t.kill()); };
+    return () => { mq.removeEventListener("change", onMq); removeEventListener("popstate", pop); tl?.kill(); };
   });
 </script>
 
@@ -232,13 +237,11 @@
     </div>
   </section>
 
-  <section id="experience" class="pin" bind:this={pinWrap}>
-    <div class="pin-head">
-      <h2>Career</h2>
-      <p>Metrics are redacted as <span class="redacted"><span aria-hidden="true">XX</span><span class="sr">XX</span></span>; email for specifics.</p>
-      <div class="bar travel" role="presentation"><i style="transform: scaleX({progress})"></i></div>
-    </div>
-    <div class="track" bind:this={track}>
+  <section id="experience" class="exp wrap">
+    <h2>Career</h2>
+    <p class="sub">Metrics are redacted as <span class="redacted"><span aria-hidden="true">XX</span><span class="sr">XX</span></span>; email for specifics.</p>
+    <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+    <div class="snap" bind:this={snap} on:scroll={() => (idx = curIdx())} on:keydown={snapKey} role="region" aria-label="Roles, scrollable. Use the arrow buttons or left and right arrow keys." tabindex="0">
       {#each roles as r, ri}
         <article class="card" class:wide={ri === 0}>
           <p class="when">{r.when}</p>
@@ -248,6 +251,11 @@
           <ul class="chips">{#each r.tags as t}<li>{t}</li>{/each}</ul>
         </article>
       {/each}
+    </div>
+    <div class="ctl">
+      <button on:click={() => goCard(idx - 1)} disabled={idx === 0} aria-label="Previous role"><span aria-hidden="true">&larr;</span></button>
+      <button on:click={() => goCard(idx + 1)} disabled={idx === roles.length - 1} aria-label="Next role"><span aria-hidden="true">&rarr;</span></button>
+      <span class="count" aria-live="polite">{idx + 1} of {roles.length}</span>
     </div>
   </section>
 
@@ -372,12 +380,6 @@
   kbd { font-family: var(--body); font-weight: 700; font-size: .68rem; line-height: 1.5; letter-spacing: .02em; background: var(--lilac-wash); border: 1px solid var(--line); border-radius: 6px; padding: 0 .35rem; color: var(--plum-soft); }
   .btn { display: inline-flex; gap: .6rem; align-items: center; padding: .8rem 1.4rem; border-radius: 999px; border: 2px solid var(--plum); background: transparent; color: var(--plum); font: inherit; font-weight: 700; text-decoration: none; cursor: pointer; }
   .btn.solid { background: var(--plum); color: #fff; }
-  .pin { min-height: 100vh; background: var(--lilac-wash); overflow: hidden; padding: 6rem 0 2rem; display: flex; flex-direction: column; justify-content: center; gap: 1.5rem; }
-  .pin-head { width: min(100% - 2.5rem, 1180px); margin: 0 auto; }
-  .pin-head p { color: var(--plum-soft); margin: .4rem 0 1rem; }
-  .bar { height: 6px; background: var(--line); border-radius: 6px; overflow: hidden; max-width: 360px; }
-  .bar i { display: block; height: 100%; background: var(--lilac-deep); transform-origin: left; }
-  .track { display: flex; align-items: flex-start; gap: 1.5rem; padding: 0 max(1.25rem, calc((100vw - 1180px)/2)); width: max-content; }
   .card { width: min(80vw, 480px); background: #fff; border: 2px solid var(--plum); border-radius: 28px; padding: 1.6rem; box-shadow: 0 8px 0 var(--lilac); }
   .card h3 { font-size: 1.35rem; } .org { font-weight: 700; color: var(--lilac-deep); margin: .25rem 0 .8rem; } .when { margin: 0 0 .4rem; color: var(--plum-soft); font-weight: 700; }
   .card ul:not(.chips) { padding-left: 1.1rem; list-style: disc; font-size: .98rem; } .card li { margin-bottom: .45rem; }
@@ -392,7 +394,7 @@
   .palette input { width: 100%; border: 0; border-bottom: 2px solid var(--line); padding: 1rem 1.2rem; font: inherit; font-weight: 600; outline: none; color: var(--plum); }
   .palette ul { padding: .4rem; } 
    .palette small { color: var(--plum-soft); font-weight: 600; text-align: right; } .none { padding: .8rem; color: var(--plum-soft); }
-  @media (max-width: 899px) { .hero { grid-template-columns: 1fr; } .track { flex-direction: column; width: auto; padding: 0 1.25rem; } .card { width: auto; } .pin { height: auto; } .nav li:nth-child(-n+2) { display: none; } }
+  @media (max-width: 899px) { .hero { grid-template-columns: 1fr; } .nav li:nth-child(-n+2) { display: none; } }
 
   .map { background: #fff; border: 2px solid var(--plum); border-radius: 36px 36px 36px 10px; padding: 1rem 1rem .5rem; }
   .cap { font-weight: 700; color: var(--plum-soft); font-size: .92rem; padding: .1rem .6rem .2rem; display: flex; justify-content: space-between; gap: 1rem; }
@@ -418,7 +420,6 @@
   
   .foot { text-align: center; padding: 2rem 1rem 3rem; color: var(--plum-soft); font-weight: 600; border-top: 1px solid var(--line); }
   @media (max-width: 760px) { }
-  .card.wide { width: min(92vw, 940px); } .card.wide ul:not(.chips) { columns: 2; column-gap: 1.75rem; } .card.wide li { break-inside: avoid; }
   @media (max-width: 899px) { .card.wide { width: auto; } .card.wide ul:not(.chips) { columns: 1; } }
   .rows { margin: 1.5rem 0 0; border-top: 2px solid var(--line); }
   .row { display: grid; grid-template-columns: 200px 1fr; gap: 1.5rem; padding: 1.25rem 0; border-bottom: 2px solid var(--line); }
@@ -452,7 +453,6 @@
   .note { margin: .8rem 1rem 1rem; font-weight: 600; color: var(--plum-soft); font-size: .95rem; }
   .panel a, .note a, .org, .row dt { color: var(--lilac-ink); }
   .panel a, .note a { text-decoration: underline; text-underline-offset: 3px; }
-  @media (max-width: 899px), (max-height: 799px) { .track { flex-direction: column; width: auto; padding: 0 1.25rem; } .card, .card.wide { width: auto; } .card.wide ul:not(.chips) { columns: 1; } .pin { height: auto; min-height: 0; } }
   @media (max-width: 420px) { .nav { width: calc(100% - 1.5rem); } .brand { font-size: .95rem; } .kbd { padding: .3rem .55rem; font-size: .85rem; } .nav li a.cta { padding: .4rem .65rem; font-size: .9rem; } }
   .ctrls { display: inline-flex; align-items: center; gap: .5rem; }
   .pausebtn { display: inline-flex; align-items: center; gap: .4rem; font: inherit; font-weight: 700; font-size: .85rem; padding: .2rem .8rem; border: 2px solid var(--plum); border-radius: 999px; background: #fff; color: var(--plum); cursor: pointer; }
@@ -503,11 +503,20 @@
   .map[data-view="list"] .pausebtn { display: none; }
   @media (max-width: 600px) { .map:not([data-view]) .pausebtn { display: none; } }
 
-  /* Career: equal-height cards when pinned, equal-width cards when stacked. */
-  .track { align-items: stretch; }
-  .card { display: flex; flex-direction: column; }
+  .card { display: flex; flex-direction: column; width: auto; }
   .card .chips { margin-top: auto; padding-top: 1rem; }
-  .travel { display: none; }
-  @media (min-width: 900px) and (min-height: 800px) { .travel { display: block; } }
-  @media (max-width: 899px), (max-height: 799px) { .track { align-items: stretch; } .card, .card.wide { width: auto; } }
+  /* Career: a row you move yourself (buttons, swipe, arrow keys); the page scrolls normally past it. */
+  .exp { padding: 5rem 0 0; }
+  .exp h2 { margin: 0 0 .4rem; } .exp .sub { color: var(--plum-soft); margin: 0 0 1.25rem; }
+  .snap { position: relative; display: flex; align-items: stretch; gap: 1.25rem; overflow-x: auto; scroll-snap-type: x mandatory; padding: .4rem .3rem 1.4rem; scroll-behavior: smooth; }
+  .snap .card { flex: 0 0 min(88%, 520px); scroll-snap-align: start; }
+  .snap .card.wide { flex-basis: min(88%, 640px); }
+  .ctl { display: flex; align-items: center; gap: .7rem; margin-top: .2rem; }
+  .ctl button { width: 2.8rem; height: 2.8rem; border-radius: 50%; border: 2px solid var(--plum); background: #fff; color: var(--plum); font: inherit; font-size: 1.2rem; font-weight: 700; cursor: pointer; }
+  .ctl button:hover:not(:disabled) { background: var(--plum); color: #fff; }
+  .ctl button:disabled { opacity: .35; cursor: default; }
+  .ctl .count { font-weight: 700; color: var(--plum-soft); }
+  .snap:focus-visible, .ctl button:focus-visible { outline: 3px solid var(--lilac-deep); outline-offset: 3px; }
+  .about, .exp, .plat, .certs, .edu, .contact { scroll-margin-top: 4rem; }
+  @media (prefers-reduced-motion: reduce) { .snap { scroll-behavior: auto; } }
 </style>
