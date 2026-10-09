@@ -261,10 +261,16 @@
       <ul class="chips"><li class="ink">Magna Cum Laude</li><li>GPA 3.965 / 4.00</li><li>Grace Hopper Scholar</li></ul>
       <details class="more">
         <summary><span class="when-closed">Show awards, leadership and activities</span><span class="when-open">Hide awards, leadership and activities</span></summary>
-      <h4>Awards</h4><ul class="tiles">{#each awards as a}<li><strong>{a.t}</strong><span>{a.s}</span><p>{a.n}</p></li>{/each}</ul>
-      <h4>Leadership and teaching</h4><ul class="tiles">{#each lead as a}<li><strong>{a.t}</strong><span>{a.s}</span></li>{/each}</ul>
-      <p class="line"><b>Work during college:</b> {work.map(w => w.t + (w.n ? " (" + w.n.replace("Promoted", "promoted") + ")" : "")).join(" · ")}</p>
-      <p class="line small"><b>Honors and clubs:</b> {clubs.join(" · ")}</p>
+      <dl class="rows">
+        <div class="row"><dt>Awards</dt>
+          <dd><ul>{#each awards as a}<li class="entry"><span class="main"><strong>{a.t}</strong><em>{a.s}</em></span><span class="stat">{a.n}</span></li>{/each}</ul></dd></div>
+        <div class="row"><dt>Leadership and teaching</dt>
+          <dd><ul>{#each lead as a}<li class="entry"><span class="main"><strong>{a.t}</strong><em>{a.s}</em></span></li>{/each}</ul></dd></div>
+        <div class="row"><dt>Work during college</dt>
+          <dd><ul>{#each work as a}<li class="entry"><span class="main"><strong>{a.t}</strong><em>{a.s}</em></span>{#if a.n}<span class="stat">{a.n}</span>{/if}</li>{/each}</ul></dd></div>
+        <div class="row"><dt>Honors and clubs</dt>
+          <dd><ul class="chips">{#each clubs as c}<li>{c}</li>{/each}</ul></dd></div>
+      </dl>
       </details>
     </article>
   </section>
@@ -371,16 +377,13 @@
   .values ul { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.25rem; }
   .values li { background: #fff; border: 2px solid var(--line); border-radius: 24px; padding: 1.25rem 1.4rem; } .values h3 { font-size: 1.15rem; margin-bottom: .4rem; } .values p { margin: 0; color: var(--plum-soft); font-size: .98rem; }
   .edu { padding: 5rem 0 2rem; } .panel2 { background: #fff; border: 2px solid var(--plum); border-radius: 28px; padding: 1.75rem; box-shadow: 0 8px 0 var(--lilac); }
-  .panel2 .meta { margin: .25rem 0 1rem; color: var(--plum-soft); font-weight: 600; } .panel2 h4 { font-family: var(--display); font-variation-settings: "SOFT" 100; margin: 1.5rem 0 .7rem; font-size: 1.05rem; }
-  .tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; } .tiles li { background: var(--lilac-wash); border-radius: 16px; padding: .85rem 1rem; }
-  .tiles strong { display: block; line-height: 1.25; } .tiles span, .tiles p { display: block; margin: .15rem 0 0; font-size: .9rem; color: var(--plum-soft); font-weight: 600; }
+  .panel2 .meta { margin: .25rem 0 1rem; color: var(--plum-soft); font-weight: 600; }
   :global(.chips li.ink) { background: var(--plum); color: #fff; border-color: var(--plum); }
   .grp { font-size: 1.05rem; margin: 1.25rem 0 .1rem; } .outside { margin-top: 3.5rem; } .skills .lede { margin-top: .5rem; }
   .foot { text-align: center; padding: 2rem 1rem 3rem; color: var(--plum-soft); font-weight: 600; border-top: 1px solid var(--line); }
-  @media (max-width: 760px) { .tiles { grid-template-columns: 1fr; } }
+  @media (max-width: 760px) { }
   .card.wide { width: min(92vw, 940px); } .card.wide ul:not(.chips) { columns: 2; column-gap: 1.75rem; } .card.wide li { break-inside: avoid; }
   @media (max-width: 899px) { .card.wide { width: auto; } .card.wide ul:not(.chips) { columns: 1; } }
-  .panel2 .line { margin: 1.25rem 0 0; color: var(--plum-soft); font-weight: 600; } .panel2 .line b { color: var(--plum); } .panel2 .line.small { font-size: .9rem; margin-top: .6rem; }
   .more { margin-top: 1.25rem; }
   .more summary { list-style: none; cursor: pointer; display: inline-flex; align-items: center; gap: .6rem; padding: .5rem 1.1rem; border: 2px solid var(--plum); border-radius: 999px; font-weight: 700; color: var(--plum); background: #fff; }
   .more summary::-webkit-details-marker { display: none; }
@@ -388,4 +391,16 @@
   .more[open] summary::after { transform: translateY(1px) rotate(-135deg); }
   .more summary:hover { background: var(--lilac-wash); }
   .more .when-open, .more[open] .when-closed { display: none; } .more[open] .when-open { display: inline; }
+  .rows { margin: 1.5rem 0 0; border-top: 2px solid var(--line); }
+  .row { display: grid; grid-template-columns: 200px 1fr; gap: 1.5rem; padding: 1.25rem 0; border-bottom: 2px solid var(--line); }
+  .row:last-child { border-bottom: 0; padding-bottom: .25rem; }
+  .row dt { font-family: var(--display); font-variation-settings: "SOFT" 100, "WONK" 1; font-weight: 600; font-size: 1.1rem; line-height: 1.25; color: var(--lilac-deep); }
+  .row dd { margin: 0; } .row dd ul { margin: 0; padding: 0; }
+  .row dd ul:not(.chips) { display: grid; gap: .9rem; }
+  .entry { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; list-style: none; }
+  .entry .main strong { display: block; line-height: 1.3; } .entry .main em { display: block; font-style: normal; color: var(--plum-soft); font-weight: 600; font-size: .92rem; }
+  .entry .stat { flex: none; background: var(--lilac-wash); border: 1.5px solid var(--line); border-radius: 999px; padding: .15rem .8rem; font-weight: 700; font-size: .85rem; color: var(--plum); white-space: nowrap; }
+  .row .chips { margin-top: 0; }
+  @media (max-width: 760px) { .row { grid-template-columns: 1fr; gap: .6rem; } .entry { flex-direction: column; align-items: flex-start; gap: .35rem; } .entry .stat { white-space: normal; } }
+  @media (max-width: 560px) { .brand small, .kbd span { display: none; } .brand { white-space: nowrap; } }
 </style>
