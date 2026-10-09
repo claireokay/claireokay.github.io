@@ -308,7 +308,7 @@
       <h3>University of Maryland, College Park</h3>
       <p class="meta">B.S. Information Science, Minor in Disability Studies</p>
       <ul class="chips"><li class="ink">Magna Cum Laude</li><li>GPA 3.965 / 4.00</li><li>Grace Hopper Scholar</li></ul>
-      <p class="cert"><strong>Certifications:</strong> Palo Alto Networks Certified Cybersecurity Practitioner · Palo Alto Networks Certified Cybersecurity Apprentice</p>
+      <p class="cert"><strong>Certifications:</strong> <a href="https://www.credly.com/badges/3b6d269b-8b8a-40b8-aecd-99f914eb7daf" target="_blank" rel="noopener noreferrer">Palo Alto Networks Certified Cybersecurity Practitioner<span class="sr"> (verify on Credly, opens in new tab)</span></a> · Palo Alto Networks Certified Cybersecurity Apprentice</p>
       <details class="more">
         <summary><span class="when-closed">Show awards, leadership and activities</span><span class="when-open">Hide awards, leadership and activities</span></summary>
       <dl class="rows">
@@ -481,4 +481,5 @@
   .map.fixed { display: flex; flex-direction: column; } .map.fixed .plwrap { flex: 1; min-height: 0; overflow-y: auto; } .map.fixed .note { flex: none; margin-bottom: .6rem; }
   .tools { margin: .9rem 0 0; font-size: 1rem; color: var(--plum-soft); } .tools strong { color: var(--plum); }
   .cert { margin: .9rem 0 0; color: var(--plum-soft); font-weight: 600; } .cert strong { color: var(--plum); }
+  .cert a { color: var(--lilac-ink); text-decoration: underline; text-underline-offset: 3px; }
 </style>
