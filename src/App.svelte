@@ -239,8 +239,11 @@
           {@const hot = l.source.id === selected || l.target.id === selected}
           <path d={l.d} fill="none" stroke={hot ? "#7d55c7" : "#9b80d8"} stroke-width={hot ? 3 : 2} stroke-linecap="round" marker-end={hot ? "url(#ahh)" : "url(#ah)"} />
           {#if !paused}{#each [0, 1] as k}
-            <circle r={hot ? 4.5 : 3.2} fill={hot ? "#2d1b4e" : "#7d55c7"} opacity={hot ? 1 : 0.7}>
-              <animateMotion dur="{2.6 + (i % 3) * 0.5}s" begin="{-k * 1.3}s" repeatCount="indefinite" path={l.d} />
+            {@const dur = 3 + (i % 3) * 0.5}
+            <!-- Dots travel 90% of each arrow (stopping before the arrowhead) and fade in and out, so none pop or pile up on a circle. -->
+            <circle r={hot ? 4.5 : 3.5} fill={hot ? "#2d1b4e" : "#7d55c7"} stroke="#fff" stroke-width="1.5" opacity="0">
+              <animateMotion dur="{dur}s" begin="{-(k * dur) / 2 - i * 0.7}s" repeatCount="indefinite" path={l.d} keyPoints="0;0.9" keyTimes="0;1" calcMode="linear" />
+              <animate attributeName="opacity" dur="{dur}s" begin="{-(k * dur) / 2 - i * 0.7}s" repeatCount="indefinite" values="0;1;1;0" keyTimes="0;0.15;0.8;1" />
             </circle>{/each}{/if}
         {/each}
         {#each gnodes as n, i}
