@@ -220,10 +220,16 @@
 
   <section id="about" class="about wrap">
     <h2>About</h2>
-    <p>I started as a software engineer intern, then realized my favorite part was deciding <em>what</em> to build and <em>why</em>. Today I own licensing and activation for cybersecurity products, and a Disability Studies minor shapes how I write requirements.</p>
-    <p>I build my own Claude skills for data analysis and use them to inform product decisions.</p>
-    <p class="tools"><strong>Tools:</strong> {tools.join(" · ")}</p>
-    <p class="tools"><strong>Outside of work:</strong> I love exploring San Francisco, trying good coffee, going hiking, and reading by the beach.</p>
+    <div class="about-grid">
+      <div class="about-text">
+        <p>I started as a software engineer intern, then realized my favorite part was deciding <em>what</em> to build and <em>why</em>. Today I own licensing and activation for cybersecurity products, and a Disability Studies minor shapes how I write requirements.</p>
+        <p>I build my own Claude skills for data analysis and use them to inform product decisions.</p>
+      </div>
+      <dl class="facts">
+        <div><dt>Tools</dt><dd>{tools.join(" · ")}</dd></div>
+        <div><dt>Outside of work</dt><dd>I love exploring San Francisco, trying good coffee, going hiking, and reading by the beach.</dd></div>
+      </dl>
+    </div>
   </section>
 
   <section id="experience" class="pin" bind:this={pinWrap}>
@@ -484,9 +490,14 @@
   /* One spacing scale for every section. */
   .about, .plat, .certs, .edu { padding: 5rem 0 0; margin-bottom: 0; }
   .contact { padding: 5rem 0; }
+  .about { padding-bottom: 4rem; }
   .about h2, .plat h2, .certs h2, .edu h2 { margin: 0 0 1rem; }
-  .about p { max-width: 42rem; color: var(--plum-soft); font-size: 1.1rem; margin: 0 0 1rem; }
-  .about p.tools { font-size: 1rem; margin: .5rem 0 0; }
+  .about-grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 3rem; align-items: start; }
+  .about-text p { color: var(--plum-soft); font-size: 1.15rem; margin: 0 0 1rem; max-width: 36rem; }
+  .facts { margin: 0; padding: 1.25rem 1.5rem; background: var(--lilac-wash); border-radius: 22px; display: grid; gap: 1.1rem; }
+  .facts dt { font-weight: 700; color: var(--lilac-ink); font-size: .9rem; margin-bottom: .2rem; }
+  .facts dd { margin: 0; color: var(--plum-soft); }
+  @media (max-width: 760px) { .about-grid { grid-template-columns: 1fr; gap: 1.5rem; } }
   .plat .sub { color: var(--plum-soft); margin: 0 0 1.25rem; max-width: 42rem; }
   .cap { justify-content: flex-end; }
   .map[data-view="list"] .pausebtn { display: none; }
