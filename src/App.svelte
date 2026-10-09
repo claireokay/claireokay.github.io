@@ -118,7 +118,7 @@
   const commands: Cmd[] = [
     { label: "Go to Experience", hint: "section", action: () => go("experience") },
     { label: "Go to About", hint: "section", action: () => go("about") },
-    { label: "Go to Education", hint: "section · awards, honors", action: () => go("education") },
+    { label: "Go to Education", hint: "section · awards, honors", action: () => { const d = document.querySelector<HTMLDetailsElement>(".more"); if (d) d.open = true; go("education"); } },
     { label: "Go to Skills", hint: "section", action: () => go("skills") },
     { label: "Go to Contact", hint: "section", action: () => go("contact") },
     ...STORIES.map<Cmd>(s => ({ label: s.title, hint: "platform map", action: () => { selected = s.id; go("top"); } })),
@@ -259,10 +259,13 @@
       <h3>University of Maryland, College Park</h3>
       <p class="meta">B.S. Information Science, Minor in Disability Studies</p>
       <ul class="chips"><li class="ink">Magna Cum Laude</li><li>GPA 3.965 / 4.00</li><li>Grace Hopper Scholar</li></ul>
+      <details class="more">
+        <summary><span class="when-closed">Show awards, leadership and activities</span><span class="when-open">Hide awards, leadership and activities</span></summary>
       <h4>Awards</h4><ul class="tiles">{#each awards as a}<li><strong>{a.t}</strong><span>{a.s}</span><p>{a.n}</p></li>{/each}</ul>
       <h4>Leadership and teaching</h4><ul class="tiles">{#each lead as a}<li><strong>{a.t}</strong><span>{a.s}</span></li>{/each}</ul>
       <p class="line"><b>Work during college:</b> {work.map(w => w.t + (w.n ? " (" + w.n.replace("Promoted", "promoted") + ")" : "")).join(" · ")}</p>
       <p class="line small"><b>Honors and clubs:</b> {clubs.join(" · ")}</p>
+      </details>
     </article>
   </section>
 
@@ -378,4 +381,11 @@
   .card.wide { width: min(92vw, 940px); } .card.wide ul:not(.chips) { columns: 2; column-gap: 1.75rem; } .card.wide li { break-inside: avoid; }
   @media (max-width: 899px) { .card.wide { width: auto; } .card.wide ul:not(.chips) { columns: 1; } }
   .panel2 .line { margin: 1.25rem 0 0; color: var(--plum-soft); font-weight: 600; } .panel2 .line b { color: var(--plum); } .panel2 .line.small { font-size: .9rem; margin-top: .6rem; }
+  .more { margin-top: 1.25rem; }
+  .more summary { list-style: none; cursor: pointer; display: inline-flex; align-items: center; gap: .6rem; padding: .5rem 1.1rem; border: 2px solid var(--plum); border-radius: 999px; font-weight: 700; color: var(--plum); background: #fff; }
+  .more summary::-webkit-details-marker { display: none; }
+  .more summary::after { content: ""; width: .5rem; height: .5rem; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: translateY(-2px) rotate(45deg); transition: transform .2s; }
+  .more[open] summary::after { transform: translateY(1px) rotate(-135deg); }
+  .more summary:hover { background: var(--lilac-wash); }
+  .more .when-open, .more[open] .when-closed { display: none; } .more[open] .when-open { display: inline; }
 </style>
