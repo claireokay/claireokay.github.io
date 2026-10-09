@@ -232,12 +232,12 @@
     <div class="about-grid">
       <div class="about-text">
         <h2>About</h2>
-        <p>I started as a software engineer intern, then realized my favorite part was deciding <em>what</em> to build and <em>why</em>. Today I own licensing and activation for cybersecurity products, and a Disability Studies minor shapes how I write requirements.</p>
-        <p>I build my own Claude skills for data analysis and use them to inform product decisions.</p>
+        <p>When we redesigned activation for the credit management platform, we put it through an accessibility assessment so anyone could get through it. We cut back on animation and made sure every part of the page had a clear label. My Disability Studies minor is a big reason I care about getting that right.</p>
+        <p>I also build my own Claude skills for analysis. They let me take thousands of data points and turn them into a customer journey I can act on.</p>
       </div>
       <dl class="facts">
         <div><dt>Tools</dt><dd>{tools.join(" · ")}</dd></div>
-        <div><dt>Outside of work</dt><dd>I love exploring San Francisco, trying good coffee, going hiking, and reading by the beach.</dd></div>
+        <div><dt>Favorite trails</dt><dd><ul class="trails"><li>San Bruno Mountain</li><li>Stevens Creek Canyon Trail</li><li>Almaden Quicksilver Park</li><li>Glen Canyon Park</li></ul></dd></div>
       </dl>
     </div>
   </section>
@@ -533,4 +533,5 @@
     .motion.in-art { display: inline-flex; margin: .9rem 0 0; padding: 0 .9rem 0 .3rem; background: var(--lilac-wash); border: 1.5px solid var(--line); }
     .motion.in-actions { display: none; }
   }
+  .trails { list-style: none; margin: 0; padding: 0; display: grid; gap: .2rem; }
 </style>
