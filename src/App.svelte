@@ -274,9 +274,6 @@
         <g clip-path="url(#clip)"><rect width="600" height="580" fill="url(#g)"/>
           <image href="/assets/images/claire-headshot.jpg" x="30" y="20" width="540" height="540" preserveAspectRatio="xMidYMid slice"/></g>
       </svg>
-      <button class="pausebtn under" on:click={() => (paused = !paused)} aria-pressed={paused}>
-        <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">{#if paused}<path d="M4 2.5v11l9-5.5z" fill="currentColor"/>{:else}<rect x="3" y="2.5" width="3.5" height="11" rx="1" fill="currentColor"/><rect x="9.5" y="2.5" width="3.5" height="11" rx="1" fill="currentColor"/>{/if}</svg>
-        <span>{paused ? "Play" : "Pause"}<span class="sr"> animation</span></span></button>
     </div>
     <div class="story-copy">
       <h2>Systems that meet people</h2>
@@ -486,7 +483,6 @@
   .ctrls { display: inline-flex; align-items: center; gap: .5rem; }
   .pausebtn { display: inline-flex; align-items: center; gap: .4rem; font: inherit; font-weight: 700; font-size: .85rem; padding: .2rem .8rem; border: 2px solid var(--plum); border-radius: 999px; background: #fff; color: var(--plum); cursor: pointer; }
   .pausebtn:hover { background: var(--lilac-wash); }
-  .pausebtn.under { margin: 2.4rem 0 0 .5rem; }
   .map.fixed { display: flex; flex-direction: column; } .map.fixed .plwrap { flex: 1; min-height: 0; overflow-y: auto; } .map.fixed .note { flex: none; margin-bottom: .6rem; }
   .tools { margin: .9rem 0 0; font-size: 1rem; color: var(--plum-soft); } .tools strong { color: var(--plum); }
   .cert { margin: .9rem 0 0; color: var(--plum-soft); font-weight: 600; } .cert strong { color: var(--plum); }
