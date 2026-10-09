@@ -120,8 +120,8 @@
   $: tl && (paused ? tl.pause() : tl.play());
   const reduce = typeof matchMedia !== "undefined" && matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  const PATHS: Record<string, string> = { main: "/", about: "/about/", experience: "/experience/", education: "/education/", contact: "/contact/" };
-  const TITLES: Record<string, string> = { main: "Claire Knorr | Product Manager", about: "About | Claire Knorr", experience: "Experience | Claire Knorr", education: "Education | Claire Knorr", contact: "Contact | Claire Knorr" };
+  const PATHS: Record<string, string> = { main: "/", about: "/about/", experience: "/experience/", certifications: "/certifications/", education: "/education/", contact: "/contact/" };
+  const TITLES: Record<string, string> = { main: "Claire Knorr | Product Manager", about: "About | Claire Knorr", experience: "Experience | Claire Knorr", certifications: "Certifications | Claire Knorr", education: "Education | Claire Knorr", contact: "Contact | Claire Knorr" };
   const idFromPath = (p: string) => Object.keys(PATHS).find(k => PATHS[k] === (p.endsWith("/") ? p : p + "/")) ?? "main";
   function show(id: string, smooth: boolean) {
     if (id === "education") { const d = document.querySelector<HTMLDetailsElement>(".more"); if (d) d.open = true; }
@@ -142,6 +142,7 @@
   const commands: Cmd[] = [
     { label: "Go to Experience", hint: "section", action: () => go("experience") },
     { label: "Go to About", hint: "section", action: () => go("about") },
+    { label: "Go to Certifications", hint: "section · Palo Alto Networks", action: () => go("certifications") },
     { label: "Go to Education", hint: "section · awards, honors", action: () => { const d = document.querySelector<HTMLDetailsElement>(".more"); if (d) d.open = true; go("education"); } },
     { label: "Go to Contact", hint: "section", action: () => go("contact") },
     ...STORIES.map<Cmd>(s => ({ label: s.title, hint: "platform map", action: () => { selected = s.id; go("main"); } })),
@@ -308,13 +309,20 @@
     </div>
   </section>
 
+  <section id="certifications" class="certs wrap">
+    <h2>Certifications</h2>
+    <ul class="certlist">
+      <li><div><strong><a href="https://www.credly.com/badges/3b6d269b-8b8a-40b8-aecd-99f914eb7daf" target="_blank" rel="noopener noreferrer">Palo Alto Networks Certified Cybersecurity Practitioner<span class="sr"> (verify on Credly, opens in new tab)</span></a></strong><span>Issued by Palo Alto Networks</span></div></li>
+      <li><div><strong>Palo Alto Networks Certified Cybersecurity Apprentice</strong><span>Issued by Palo Alto Networks</span></div></li>
+    </ul>
+  </section>
+
   <section id="education" class="edu wrap">
     <h2>Education</h2>
     <article class="panel2">
       <h3>University of Maryland, College Park</h3>
       <p class="meta">B.S. Information Science, Minor in Disability Studies</p>
       <ul class="chips"><li class="ink">Magna Cum Laude</li><li>GPA 3.965 / 4.00</li><li>Grace Hopper Scholar</li></ul>
-      <p class="cert"><strong>Certifications:</strong> <a href="https://www.credly.com/badges/3b6d269b-8b8a-40b8-aecd-99f914eb7daf" target="_blank" rel="noopener noreferrer">Palo Alto Networks Certified Cybersecurity Practitioner<span class="sr"> (verify on Credly, opens in new tab)</span></a> · Palo Alto Networks Certified Cybersecurity Apprentice</p>
       <details class="more">
         <summary><span class="when-closed">Show awards, leadership and activities</span><span class="when-open">Hide awards, leadership and activities</span></summary>
       <dl class="rows">
@@ -485,6 +493,9 @@
   .pausebtn:hover { background: var(--lilac-wash); }
   .map.fixed { display: flex; flex-direction: column; } .map.fixed .plwrap { flex: 1; min-height: 0; overflow-y: auto; } .map.fixed .note { flex: none; margin-bottom: .6rem; }
   .tools { margin: .9rem 0 0; font-size: 1rem; color: var(--plum-soft); } .tools strong { color: var(--plum); }
-  .cert { margin: .9rem 0 0; color: var(--plum-soft); font-weight: 600; } .cert strong { color: var(--plum); }
-  .cert a { color: var(--lilac-ink); text-decoration: underline; text-underline-offset: 3px; }
+  .certs { padding: 3rem 0 0; scroll-margin-top: 2rem; } .certs h2 { margin-bottom: 1.25rem; }
+  .certlist { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; list-style: none; margin: 0; padding: 0; }
+  .certlist li { background: #fff; border: 2px solid var(--line); border-radius: 22px; padding: 1.1rem 1.3rem; }
+  .certlist strong { display: block; line-height: 1.3; } .certlist span { display: block; margin-top: .2rem; color: var(--plum-soft); font-weight: 600; font-size: .92rem; }
+  .certlist a { color: var(--lilac-ink); text-decoration: underline; text-underline-offset: 3px; }
 </style>

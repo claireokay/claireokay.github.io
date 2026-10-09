@@ -11,7 +11,7 @@ fs.copyFileSync("src/theme.css", "assets/theme.css");
 const home = fs.readFileSync("src/index.html", "utf8");
 fs.writeFileSync("index.html", home);
 // Real pages at clean URLs (/about/, /experience/, ...) so direct links and refreshes return 200, not a 404 redirect.
-const pages = { about: "About", experience: "Experience", education: "Education", contact: "Contact" };
+const pages = { about: "About", experience: "Experience", certifications: "Certifications", education: "Education", contact: "Contact" };
 for (const [dir, name] of Object.entries(pages)) {
   fs.mkdirSync(dir, { recursive: true });
   fs.writeFileSync(`${dir}/index.html`, home
