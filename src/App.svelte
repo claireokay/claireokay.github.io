@@ -224,9 +224,9 @@
   </section>
 
   <section id="about" class="about wrap">
-    <h2>About</h2>
     <div class="about-grid">
       <div class="about-text">
+        <h2>About</h2>
         <p>I started as a software engineer intern, then realized my favorite part was deciding <em>what</em> to build and <em>why</em>. Today I own licensing and activation for cybersecurity products, and a Disability Studies minor shapes how I write requirements.</p>
         <p>I build my own Claude skills for data analysis and use them to inform product decisions.</p>
       </div>
@@ -493,9 +493,9 @@
   .contact { padding: 5rem 0; }
   .about { padding-bottom: 4rem; }
   .about h2, .plat h2, .certs h2, .edu h2 { margin: 0 0 1rem; }
-  .about-grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 3rem; align-items: start; }
+  .about-grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 3rem; align-items: stretch; }
   .about-text p { color: var(--plum-soft); font-size: 1.15rem; margin: 0 0 1rem; max-width: 36rem; }
-  .facts { margin: 0; padding: 1.25rem 1.5rem; background: var(--lilac-wash); border-radius: 22px; display: grid; gap: 1.1rem; }
+  .facts { margin: 0; align-content: center; padding: 1.5rem 1.75rem; background: var(--lilac-wash); border-radius: 22px; display: grid; gap: 1.1rem; }
   .facts dt { font-weight: 700; color: var(--lilac-ink); font-size: .9rem; margin-bottom: .2rem; }
   .facts dd { margin: 0; color: var(--plum-soft); }
   @media (max-width: 760px) { .about-grid { grid-template-columns: 1fr; gap: 1.5rem; } }
