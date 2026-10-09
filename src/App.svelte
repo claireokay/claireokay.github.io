@@ -62,7 +62,7 @@
   type Tone = "deep" | "lilac" | "blush" | "plum" | "wash";
   interface Story { id: string; label: string; title: string; text: string; r: number; tone: Tone }
   interface GNode extends Story { x: number; y: number }
-  interface GLink { source: GNode; target: GNode; x1: number; y1: number; x2: number; y2: number }
+  interface GLink { source: GNode; target: GNode; d: string }
   const STORIES: Story[] = [
     { id: "trial", label: "Trial request", title: "Product-led growth trial", r: 30, tone: "wash", text: "Instant activation replaces a roughly XX-week approval, with automated trial value reports that tell Sales and GTM who to follow up with." },
     { id: "activation", label: "Activation", title: "Activation orchestrator", r: 34, tone: "lilac", text: "Subscriptions, SaaS activations, and bundles all activate through one flow, at XX% reliability." },
@@ -73,18 +73,23 @@
   ];
 
   // Flow: Trial request -> Activation -> (Credit platform, LLM support); Credit platform -> (Usage metering, Onboarding)
-  const EDGES: [string, string][] = [["trial","activation"],["activation","platform"],["activation","ai"],["platform","metering"],["platform","onboarding"]];
+  const EDGES: [string, string, string?][] = [["trial","activation"],["activation","platform"],["activation","ai"],["platform","metering"],["platform","onboarding"],["activation","onboarding","curve"]];
   const FILL: Record<Tone, string> = { deep: "#7d55c7", lilac: "#c9b3f0", blush: "#ffb8d9", plum: "#2d1b4e", wash: "#f1e9fd" };
   const W = 640, H = 430;
   const POS: Record<string, [number, number]> = { trial: [72, 215], activation: [212, 215], platform: [380, 140], ai: [380, 330], metering: [566, 70], onboarding: [566, 215] };
   const gnodes: GNode[] = STORIES.map(s => ({ ...s, x: POS[s.id][0], y: POS[s.id][1] }));
   const byId = Object.fromEntries(gnodes.map(n => [n.id, n]));
   // Arrows run from circle edge to circle edge so the heads are visible.
-  const glinks: GLink[] = EDGES.map(([a, b]) => {
-    const s = byId[a], t = byId[b], dx = t.x - s.x, dy = t.y - s.y, len = Math.hypot(dx, dy), ux = dx / len, uy = dy / len;
-    return { source: s, target: t, x1: s.x + ux * (s.r + 4), y1: s.y + uy * (s.r + 4), x2: t.x - ux * (t.r + 10), y2: t.y - uy * (t.r + 10) };
+  const glinks: GLink[] = EDGES.map(([a, b, kind]) => {
+    const s = byId[a], t = byId[b];
+    // Straight edges aim at the other circle; the curved one bows below the platform so it doesn't cross its label.
+    const cx = kind === "curve" ? (s.x + t.x) / 2 : null, cy = kind === "curve" ? (s.y + t.y) / 2 + 50 : null;
+    const unit = (fx: number, fy: number, tx: number, ty: number) => { const dx = tx - fx, dy = ty - fy, l = Math.hypot(dx, dy); return [dx / l, dy / l]; };
+    const [sx, sy] = unit(s.x, s.y, cx ?? t.x, cy ?? t.y), [ex, ey] = unit(cx ?? s.x, cy ?? s.y, t.x, t.y);
+    const x1 = s.x + sx * (s.r + 4), y1 = s.y + sy * (s.r + 4), x2 = t.x - ex * (t.r + 10), y2 = t.y - ey * (t.r + 10);
+    return { source: s, target: t, d: cx === null ? `M${x1},${y1} L${x2},${y2}` : `M${x1},${y1} Q${cx},${cy} ${x2},${y2}` };
   });
-  const FLOW_TEXT = "Flow: a trial request leads to activation. Activation leads to the credit management platform and to LLM-assisted support. The credit management platform leads to usage metering and onboarding.";
+  const FLOW_TEXT = "Flow: a trial request leads to activation. Activation leads to the credit management platform, to LLM-assisted support, and to onboarding. The credit management platform leads to usage metering and onboarding.";
   let selected = "platform";
   $: active = gnodes.find(n => n.id === selected)!;
   const nodeKey = (e: KeyboardEvent, id: string) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); selected = id; } };
@@ -232,10 +237,10 @@
         </defs>
         {#each glinks as l, i}
           {@const hot = l.source.id === selected || l.target.id === selected}
-          <line x1={l.x1} y1={l.y1} x2={l.x2} y2={l.y2} stroke={hot ? "#7d55c7" : "#9b80d8"} stroke-width={hot ? 3 : 2} stroke-linecap="round" marker-end={hot ? "url(#ahh)" : "url(#ah)"} />
+          <path d={l.d} fill="none" stroke={hot ? "#7d55c7" : "#9b80d8"} stroke-width={hot ? 3 : 2} stroke-linecap="round" marker-end={hot ? "url(#ahh)" : "url(#ah)"} />
           {#if !paused}{#each [0, 1] as k}
             <circle r={hot ? 4.5 : 3.2} fill={hot ? "#2d1b4e" : "#7d55c7"} opacity={hot ? 1 : 0.7}>
-              <animateMotion dur="{2.6 + (i % 3) * 0.5}s" begin="{-k * 1.3}s" repeatCount="indefinite" path="M{l.x1},{l.y1} L{l.x2},{l.y2}" />
+              <animateMotion dur="{2.6 + (i % 3) * 0.5}s" begin="{-k * 1.3}s" repeatCount="indefinite" path={l.d} />
             </circle>{/each}{/if}
         {/each}
         {#each gnodes as n, i}
