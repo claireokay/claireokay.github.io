@@ -213,13 +213,16 @@
         <g clip-path="url(#clip)"><rect width="600" height="580" fill="url(#g)"/>
           <image href="/assets/images/claire-headshot.jpg" x="30" y="20" width="540" height="540" preserveAspectRatio="xMidYMid slice"/></g>
       </svg>
+      <button class="motion in-art" on:click={() => (paused = !paused)} aria-pressed={paused}>
+          <span class="mi" aria-hidden="true"><svg viewBox="0 0 16 16" width="12" height="12"><rect x="3.5" y="2.5" width="3" height="11" rx="1" fill="currentColor"/><rect x="9.5" y="2.5" width="3" height="11" rx="1" fill="currentColor"/></svg></span>
+          <span>Pause motion</span></button>
     </div>
     <div class="copy">
       <h1>Claire Knorr</h1>
       <p class="role">Product Manager at Palo Alto Networks · San Francisco Bay Area</p>
       <p class="lede">I own licensing and activation for Palo Alto Networks' cybersecurity products, from the credit platform customers buy with to the usage metering behind their bills.</p>
       <div class="actions"><a class="btn solid" href="/resume.pdf" target="_blank" rel="noopener">Résumé<span class="sr"> (PDF, opens in new tab)</span></a><a class="btn" href="mailto:clairepknorr@gmail.com">Email me</a>
-        <button class="motion" on:click={() => (paused = !paused)} aria-pressed={paused}>
+        <button class="motion in-actions" on:click={() => (paused = !paused)} aria-pressed={paused}>
           <span class="mi" aria-hidden="true"><svg viewBox="0 0 16 16" width="12" height="12"><rect x="3.5" y="2.5" width="3" height="11" rx="1" fill="currentColor"/><rect x="9.5" y="2.5" width="3" height="11" rx="1" fill="currentColor"/></svg></span>
           <span>Pause motion</span></button></div>
     </div>
@@ -479,12 +482,12 @@
 
   /* Face-first top: portrait, name, one sentence, two links. */
   .hero { display: grid; grid-template-columns: minmax(0, 380px) 1fr; align-items: center; gap: 3rem; width: min(100% - 2.5rem, 1180px); margin: 0 auto; padding: 8rem 0 1rem; }
-  .art svg { width: 100%; height: auto; display: block; filter: drop-shadow(0 14px 0 var(--lilac)); }
+  .art > svg { width: 100%; height: auto; display: block; filter: drop-shadow(0 14px 0 var(--lilac)); }
   h1 { font-size: clamp(2.6rem, 6vw, 4.25rem); letter-spacing: -.02em; line-height: 1.05; margin: 0 0 .6rem; }
   .role { margin: 0 0 1.1rem; font-weight: 700; color: var(--lilac-ink); font-size: 1.1rem; }
   .lede { font-size: 1.2rem; color: var(--plum-soft); max-width: 34rem; margin: 0; }
   .actions { display: flex; gap: .75rem; flex-wrap: wrap; margin-top: 1.5rem; }
-  @media (max-width: 760px) { .hero { grid-template-columns: 1fr; gap: 1.5rem; padding-top: 6rem; } .art { max-width: 300px; } }
+  @media (max-width: 760px) { .hero { grid-template-columns: 1fr; gap: 1.25rem; padding-top: 6rem; } }
 
   /* One spacing scale for every section. */
   .about, .plat, .certs, .edu { padding: 5rem 0 0; margin-bottom: 0; }
@@ -523,4 +526,11 @@
   .motion:hover { color: var(--plum); } .motion:hover .mi { background: var(--lilac); }
   .motion[aria-pressed="true"] .mi { background: var(--plum); border-color: var(--plum); color: #fff; }
   .motion:focus-visible { outline: 3px solid var(--lilac-deep); outline-offset: 2px; }
+  .motion.in-art { display: none; }
+  @media (max-width: 760px) {
+    .art { display: flex; flex-direction: column; align-items: center; width: min(100%, 300px); }
+    .art > svg { width: 100%; }
+    .motion.in-art { display: inline-flex; margin: .9rem 0 0; padding: 0 .9rem 0 .3rem; background: var(--lilac-wash); border: 1.5px solid var(--line); }
+    .motion.in-actions { display: none; }
+  }
 </style>
