@@ -7,9 +7,9 @@
   import { fill } from "./metrics";
   const ICONS = { github: faGithub.icon, linkedin: faLinkedin.icon };
 
-  type Role = { id: string; title: string; org: string; when: string; points: string[]; tags: string[] };
+  type Role = { id: string; title: string; org: string; when: string; since: string; points: string[]; tags: string[] };
   const roles: Role[] = [
-    { id: "panw", title: "Product Manager, Licensing and Activation", org: "Palo Alto Networks", when: "Aug 2025 to present",
+    { id: "panw", title: "Product Manager, Licensing and Activation", org: "Palo Alto Networks", when: "Aug 2025 to present", since: "2025-08",
       points: ["Built and scaled a 0-1 credit management platform to {creditProducts} cybersecurity products, {creditCurrencies} credit currencies, and {creditOfferings} offerings (subscriptions, SaaS activations, and bundles), unlocking new revenue streams for {creditCustomers} customers at {activationReliability} activation reliability.",
                "Launched usage metering for credit products across {meteringEventTypes} activation event types, achieving {billingAccuracy} billing accuracy by positioning the credit platform as the activation orchestrator.",
                "Shipped an LLM feature that summarizes activation failures and proactively opens support cases, cutting MTTR by {mttrDaysSaved} days and manual case creation by {manualCasesCut}.",
@@ -18,13 +18,13 @@
                "Cut activation-related support tickets from {ticketsBefore} to under {ticketsAfter} by redesigning onboarding across {onboardingProducts} products, reducing required inputs from {inputsBefore} to {inputsAfter}.",
                "Conducted {interviews} customer discovery interviews with network security admins, prioritizing pain points into {roadmapFeatures} net-new roadmap features."],
       tags: ["0-1 platforms", "Generative AI", "Usage metering", "Product-led growth", "Roadmapping"] },
-    { id: "wmt", title: "Product Manager Intern", org: "Walmart", when: "Summer 2024",
+    { id: "wmt", title: "Product Manager Intern", org: "Walmart", when: "Summer 2024", since: "2024",
       points: ["Authored a PRD and presented findings to leadership, driving the shipment of new ML models and metadata inputs to measure inspiration-score effectiveness.",
                "Defined {wmtMetrics} production metrics for a homepage inspiration score measuring personalization content, adopted by Data Science.",
                "Validated the score against {wmtYears} years of shopper click-through data in Tableau, Looker, and Excel.",
                "Built a content prioritization framework with Data Science, Business, and Merchandising across {wmtCampaigns} annual campaigns."],
       tags: ["PRDs", "Metrics definition", "Tableau", "Looker"] },
-    { id: "amex", title: "Software Engineer Intern", org: "American Express", when: "Jan 2023 and Summer 2023",
+    { id: "amex", title: "Software Engineer Intern", org: "American Express", when: "Jan 2023 and Summer 2023", since: "2023",
       points: ["Led the migration of {amexWorkflows} shell-script workflows to Python, creating a compliance automation adopted org-wide that saved {amexHoursSaved} hours of manual work daily.",
                "Drove sprint planning as technical lead on the compliance automation.",
                "Built a React.js login authentication system for the Corporate Technology team.",
@@ -88,7 +88,7 @@
   $: active = gnodes.find(n => n.id === selected)!;
   const nodeKey = (e: KeyboardEvent, id: string) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); selected = id; } };
 
-  let track: HTMLDivElement;
+  let track: HTMLOListElement;
   let pinWrap: HTMLElement;
   let progress = 0;
   let paletteOpen = false;
@@ -158,23 +158,51 @@
     isMac = /Mac|iPhone|iPad/.test(navigator.platform);
     const mq = matchMedia("(max-width: 600px)"); narrow = mq.matches;
     const onMq = () => (narrow = mq.matches); mq.addEventListener("change", onMq);
+    // The career row pins and scrolls sideways only when the whole row fits the window; otherwise it stays a stacked list.
+    // The stacked list is also what scrapers, no-JS readers and reduced-motion users get.
+    let tween: gsap.core.Timeline | undefined;
+    const head = pinWrap.querySelector<HTMLElement>(".pin-head")!;
+    function layout() {
+      const was = !!tween;
+      tween?.scrollTrigger?.kill(true); tween?.kill(); tween = undefined;
+      gsap.set(track, { clearProps: "transform" }); progress = 0;
+      pinWrap.classList.add("pinned");
+      const cs = getComputedStyle(pinWrap);
+      const need = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom) + parseFloat(cs.rowGap) + head.offsetHeight + track.offsetHeight;
+      if (reduce || innerWidth < 900 || need > innerHeight) {
+        pinWrap.classList.remove("pinned");
+        if (was) ScrollTrigger.refresh();
+        return;
+      }
+      // Stops: row positions where a card sits fully in view. At each one the row holds still for a screen of scrolling,
+      // so anything that pages down a screen at a time (a reader, or a screenshot-driven agent) lands on every card.
+      // Between stops the row moves 1:1 with the scroll. Sizes are fixed per layout; a resize rebuilds it.
+      const dist = track.scrollWidth - innerWidth + 80;
+      const cards = [...track.children] as HTMLElement[];
+      const stops = [...new Set(cards.map(c => Math.round(Math.min(dist, c.offsetLeft - cards[0].offsetLeft))))];
+      const hold = innerHeight;
+      const length = stops.length * hold + stops[stops.length - 1];
+      tween = gsap.timeline({ defaults: { ease: "none" }, scrollTrigger: {
+        trigger: pinWrap, start: "top top", end: "+=" + length, pin: true, scrub: 0.6, onUpdate: s => (progress = s.progress) } });
+      stops.forEach((x, i) => { if (i) tween!.to(track, { x: -x, duration: x - stops[i - 1] }); tween!.to({}, { duration: hold }); });
+    }
+    layout();
+    document.fonts?.ready.then(layout);
+    let lastW = innerWidth, lastH = innerHeight, timer = 0;
+    const onResize = () => { clearTimeout(timer); timer = window.setTimeout(() => {
+      if (innerWidth === lastW && Math.abs(innerHeight - lastH) < 60) return; // ignore phone address-bar jiggle
+      lastW = innerWidth; lastH = innerHeight; layout(); }, 200); };
+    addEventListener("resize", onResize);
     const landing = idFromPath(location.pathname);
     if (landing !== "main") {
       document.title = TITLES[landing];
-      const land = () => { ScrollTrigger.refresh(); show(landing, false); };
+      const land = () => { layout(); ScrollTrigger.refresh(); show(landing, false); };
       addEventListener("load", () => setTimeout(land, 150), { once: true });
       if (document.readyState === "complete") setTimeout(land, 150);
     }
     const pop = () => { const id = idFromPath(location.pathname); document.title = TITLES[id]; show(id, false); };
     addEventListener("popstate", pop);
-    const mm = gsap.matchMedia();
-    mm.add("(min-width: 900px) and (min-height: 800px)", () => {
-      const dist = () => track.scrollWidth - window.innerWidth + 80;
-      gsap.to(track, { x: () => -dist(), ease: "none", scrollTrigger: {
-        trigger: pinWrap, start: "top top", end: () => "+=" + dist(), pin: true, scrub: reduce ? true : 0.6, invalidateOnRefresh: true,
-        onUpdate: s => (progress = s.progress) } });
-    });
-    return () => { mq.removeEventListener("change", onMq); removeEventListener("popstate", pop); mm.revert(); ScrollTrigger.getAll().forEach(t => t.kill()); };
+    return () => { mq.removeEventListener("change", onMq); removeEventListener("popstate", pop); removeEventListener("resize", onResize); clearTimeout(timer); tween?.kill(); ScrollTrigger.getAll().forEach(t => t.kill()); };
   });
 </script>
 
@@ -226,22 +254,26 @@
 
   <section id="experience" class="pin" bind:this={pinWrap}>
     <div class="pin-head">
-      <h2>Career</h2>
-      <p>Scroll to travel through it.</p>
+      <h2>Experience</h2>
+      <p class="hint" aria-hidden="true">Scroll to move through roles.</p>
       <div class="bar" role="presentation"><i style="transform: scaleX({progress})"></i></div>
     </div>
-    <div class="track" bind:this={track}>
+    <ol class="track" bind:this={track}>
       {#each roles as r, ri}
-        <article class="card" class:wide={ri === 0}>
-          <p class="when">{r.when}</p>
-          <h3>{r.title}</h3>
-          <p class="org">{r.org}</p>
-          <ul>{#each r.points as p}<li>{#each fill(p) as seg}{#if seg.todo}<mark class="todo">{seg.t}</mark>{:else}{seg.t}{/if}{/each}</li>{/each}</ul>
-          {#if r.id === "panw"}<p class="more-link"><a href="#platform" on:click|preventDefault={() => show("platform", true)}>How the platform fits together ↓</a></p>{/if}
-          <ul class="chips">{#each r.tags as t}<li>{t}</li>{/each}</ul>
-        </article>
+        <li class="card" class:wide={ri === 0}><article>
+          <header class="card-head">
+            <p class="when"><time datetime={r.since}>{r.when}</time></p>
+            <h3>{r.title}</h3>
+            <p class="org">{r.org}</p>
+          </header>
+          <ul class="points">{#each r.points as p}<li>{#each fill(p) as seg}{#if seg.todo}<mark class="todo">{seg.t}</mark>{:else}{seg.t}{/if}{/each}</li>{/each}</ul>
+          <footer class="card-foot">
+            {#if r.id === "panw"}<p class="more-link"><a href="#platform" on:click|preventDefault={() => show("platform", true)}>How the platform fits together ↓</a></p>{/if}
+            <p class="tags">{r.tags.join(" · ")}</p>
+          </footer>
+        </article></li>
       {/each}
-    </div>
+    </ol>
   </section>
 
   <section id="platform" class="platform wrap">
@@ -371,15 +403,30 @@
   .actions { display: flex; gap: .75rem; flex-wrap: wrap; margin-top: 1.75rem; }
   .btn { display: inline-flex; gap: .6rem; align-items: center; padding: .8rem 1.4rem; border-radius: 999px; border: 2px solid var(--plum); background: transparent; color: var(--plum); font: inherit; font-weight: 700; text-decoration: none; cursor: pointer; }
   .btn.solid { background: var(--plum); color: #fff; }
-  .pin { min-height: 100vh; background: var(--lilac-wash); overflow: hidden; padding: 6rem 0 2rem; display: flex; flex-direction: column; justify-content: center; gap: 1.5rem; }
+  /* overflow: clip (not hidden) so the section is not a scroll container: scrollIntoView or focus can't shift the track sideways. */
+  .pin { background: var(--lilac-wash); overflow: clip; padding: 4rem 0; display: flex; flex-direction: column; gap: 1.5rem; }
   .pin-head { width: min(100% - 2.5rem, 1180px); margin: 0 auto; }
-  .pin-head p { color: var(--plum-soft); margin: .4rem 0 1rem; }
+  .pin-head .hint, .pin-head .bar { display: none; }
+  .pin-head .hint { color: var(--plum-soft); margin: .4rem 0 1rem; }
   .bar { height: 6px; background: var(--line); border-radius: 6px; overflow: hidden; max-width: 360px; }
   .bar i { display: block; height: 100%; background: var(--lilac-deep); transform-origin: left; }
-  .track { display: flex; align-items: flex-start; gap: 1.5rem; padding: 0 max(1.25rem, calc((100vw - 1180px)/2)); width: max-content; }
-  .card { width: min(80vw, 480px); background: #fff; border: 2px solid var(--plum); border-radius: 28px; padding: 1.6rem; box-shadow: 0 8px 0 var(--lilac); }
-  .card h3 { font-size: 1.35rem; } .org { font-weight: 700; color: var(--lilac-deep); margin: .25rem 0 .8rem; } .when { margin: 0 0 .4rem; color: var(--plum-soft); font-weight: 700; }
-  .card ul:not(.chips) { padding-left: 1.1rem; list-style: disc; font-size: .98rem; } .card li { margin-bottom: .45rem; }
+  .track { list-style: none; display: flex; flex-direction: column; gap: 1.5rem; width: min(100% - 2.5rem, 1180px); margin: 0 auto; padding: 0; }
+  .card { display: flex; background: #fff; border: 2px solid var(--plum); border-radius: 28px; padding: 1.6rem; box-shadow: 0 8px 0 var(--lilac); }
+  .card article { flex: 1; display: flex; flex-direction: column; }
+  .card h3 { font-size: 1.35rem; } .org { font-weight: 700; margin: .25rem 0 .8rem; } .when { margin: 0 0 .4rem; color: var(--plum-soft); font-weight: 700; }
+  .points { padding-left: 1.1rem; list-style: disc; font-size: .98rem; margin: 0; } .points li { margin-bottom: .45rem; break-inside: avoid; }
+  .card-foot { margin-top: auto; } .tags { margin: .8rem 0 0; color: var(--plum-soft); font-size: .9rem; font-weight: 600; }
+  /* Wide windows, not pinned: a résumé-style row per role, dates and title on the left. */
+  @media (min-width: 900px) {
+    .pin:not(:global(.pinned)) .card article { display: grid; grid-template-columns: 15rem 1fr; column-gap: 2.5rem; align-content: start; }
+    .pin:not(:global(.pinned)) .card-head { grid-row: 1 / span 2; } .pin:not(:global(.pinned)) .points, .pin:not(:global(.pinned)) .card-foot { grid-column: 2; }
+  }
+  /* Pinned: one row of equal-height cards that scrolls sideways. */
+  .pin:global(.pinned) { min-height: 100vh; justify-content: center; padding: 6rem 0 2rem; }
+  :global(.pinned) .pin-head .hint, :global(.pinned) .pin-head .bar { display: block; }
+  :global(.pinned) .track { flex-direction: row; align-items: stretch; width: max-content; margin: 0; padding: 0 max(1.25rem, calc((100vw - 1180px) / 2)); }
+  :global(.pinned) .card { width: min(80vw, 480px); } :global(.pinned) .card.wide { width: min(92vw, 940px); }
+  :global(.pinned) .card.wide .points { columns: 2; column-gap: 1.75rem; }
   .chips { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: 1rem; }
   .chips li { list-style: none; background: var(--lilac-wash); border: 1.5px solid var(--line); border-radius: 999px; padding: .2rem .75rem; font-weight: 700; font-size: .85rem; margin: 0; }
  
@@ -391,7 +438,7 @@
   .palette input { width: 100%; border: 0; border-bottom: 2px solid var(--line); padding: 1rem 1.2rem; font: inherit; font-weight: 600; outline: none; color: var(--plum); }
   .palette ul { padding: .4rem; } 
    .palette small { color: var(--plum-soft); font-weight: 600; text-align: right; } .none { padding: .8rem; color: var(--plum-soft); }
-  @media (max-width: 899px) { .hero { grid-template-columns: 1fr; } .track { flex-direction: column; width: auto; padding: 0 1.25rem; } .card { width: auto; } .pin { height: auto; } .nav li:nth-child(-n+2) { display: none; } }
+  @media (max-width: 899px) { .nav li:nth-child(-n+2) { display: none; } }
 
   .map { background: #fff; border: 2px solid var(--plum); border-radius: 36px 36px 36px 10px; padding: 1rem 1rem .5rem; }
   .map svg { width: 100%; height: auto; display: block; overflow: visible; }
@@ -421,8 +468,6 @@
   
   .foot { text-align: center; padding: 2rem 1rem 3rem; color: var(--plum-soft); font-weight: 600; border-top: 1px solid var(--line); }
   @media (max-width: 760px) { }
-  .card.wide { width: min(92vw, 940px); } .card.wide ul:not(.chips) { columns: 2; column-gap: 1.75rem; } .card.wide li { break-inside: avoid; }
-  @media (max-width: 899px) { .card.wide { width: auto; } .card.wide ul:not(.chips) { columns: 1; } }
   .more { margin-top: 1.25rem; }
   .more summary { list-style: none; cursor: pointer; display: inline-flex; align-items: center; gap: .6rem; padding: .5rem 1.1rem; border: 2px solid var(--plum); border-radius: 999px; font-weight: 700; color: var(--plum); background: #fff; }
   .more summary::-webkit-details-marker { display: none; }
@@ -459,7 +504,6 @@
   .plist { display: grid; gap: .75rem; padding: .25rem .5rem; margin: .5rem 0 0; list-style: none; }
   .plist li { background: var(--lilac-wash); border-radius: 18px; padding: .8rem 1.1rem; } .plist h3 { font-size: 1.1rem; margin-bottom: .2rem; } .plist p { margin: 0; color: var(--plum-soft); font-size: .98rem; }
   .org, .row dt { color: var(--lilac-ink); }
-  @media (max-width: 899px), (max-height: 799px) { .track { flex-direction: column; width: auto; padding: 0 1.25rem; } .card, .card.wide { width: auto; } .card.wide ul:not(.chips) { columns: 1; } .pin { height: auto; min-height: 0; } }
   @media (max-width: 420px) { .nav { width: calc(100% - 1.5rem); } .brand { font-size: .95rem; } .kbd { padding: .3rem .55rem; font-size: .85rem; } .nav li a.cta { padding: .4rem .65rem; font-size: .9rem; } }
   .map.fixed { display: flex; flex-direction: column; } .map.fixed .plwrap { flex: 1; min-height: 0; overflow-y: auto; }
   .tools { margin: .9rem 0 0; font-size: 1rem; color: var(--plum-soft); } .tools strong { color: var(--plum); }
