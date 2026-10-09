@@ -232,7 +232,7 @@
     <div class="about-grid">
       <div class="about-text">
         <h2>About</h2>
-        <p>When we redesigned activation for the credit management platform, we put it through an accessibility assessment so anyone could get through it. We cut back on animation and made sure every part of the page had a clear label. My Disability Studies minor is a big reason I care about getting that right.</p>
+        <p>I care about building products anyone can use. When we redesigned activation for the credit management platform, we put it through an accessibility assessment, cut back on animation, and made sure every part of the page had a clear label.</p>
         <p>I also build my own Claude skills for analysis. They let me take thousands of data points and turn them into a customer journey I can act on.</p>
       </div>
       <dl class="facts">
