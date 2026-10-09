@@ -32,12 +32,8 @@
       points: ["Redesigned the interface of an internal banking tool used by XX+ employees daily, delivering a full front-end overhaul within a XX-week sprint using HTML, CSS, and JavaScript."],
       tags: ["HTML/CSS", "JavaScript", "UI redesign"] },
   ];
-  const skillGroups: { name: string; items: string[] }[] = [
-    { name: "Product", items: ["0-1 product development", "Roadmapping", "PRDs", "Usage metering", "Product-led growth", "Go-to-market", "Customer discovery", "Metrics definition"] },
-    { name: "AI and engineering", items: ["Generative AI", "Python", "React.js", "JavaScript", "HTML/CSS", "SQL"] },
-    { name: "Tools and security", items: ["Tableau", "Looker", "Excel", "PANW Certified Cybersecurity Apprentice"] },
-    { name: "Working style", items: ["Cross-functional leadership", "Accessibility", "Clear writing", "Stakeholder alignment"] },
-  ];
+  const tools = ["Python", "React.js", "JavaScript", "SQL", "Tableau", "Looker", "Excel"];
+
   const awards = [
     { t: "Outstanding Student Employee Recipient", s: "Division of Student Affairs", n: "Selected from 2100 employees" },
     { t: "Outstanding Customer Service Award", s: "Department of Resident Life", n: "Selected from over 200 resident assistants" },
@@ -60,7 +56,6 @@
     { t: "Bridge-builder", d: "At home in technical and non-technical conversations. Engineering, design, finance, sales: I translate across all of them." },
     { t: "Fluent with AI tools", d: "I treat AI as a working tool. I've shipped an LLM feature into enterprise support and built my own Claude skills for data analysis to inform product decisions." },
   ];
-  const skills = skillGroups.flatMap(g => g.items);
   type Cmd = { label: string; hint: string; action: () => void };
 
 
@@ -124,8 +119,8 @@
   $: tl && (paused ? tl.pause() : tl.play());
   const reduce = typeof matchMedia !== "undefined" && matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  const PATHS: Record<string, string> = { main: "/", about: "/about/", experience: "/experience/", education: "/education/", skills: "/skills/", contact: "/contact/" };
-  const TITLES: Record<string, string> = { main: "Claire Knorr | Product Manager", about: "About | Claire Knorr", experience: "Experience | Claire Knorr", education: "Education | Claire Knorr", skills: "Skills | Claire Knorr", contact: "Contact | Claire Knorr" };
+  const PATHS: Record<string, string> = { main: "/", about: "/about/", experience: "/experience/", education: "/education/", contact: "/contact/" };
+  const TITLES: Record<string, string> = { main: "Claire Knorr | Product Manager", about: "About | Claire Knorr", experience: "Experience | Claire Knorr", education: "Education | Claire Knorr", contact: "Contact | Claire Knorr" };
   const idFromPath = (p: string) => Object.keys(PATHS).find(k => PATHS[k] === (p.endsWith("/") ? p : p + "/")) ?? "main";
   function show(id: string, smooth: boolean) {
     if (id === "education") { const d = document.querySelector<HTMLDetailsElement>(".more"); if (d) d.open = true; }
@@ -147,11 +142,10 @@
     { label: "Go to Experience", hint: "section", action: () => go("experience") },
     { label: "Go to About", hint: "section", action: () => go("about") },
     { label: "Go to Education", hint: "section · awards, honors", action: () => { const d = document.querySelector<HTMLDetailsElement>(".more"); if (d) d.open = true; go("education"); } },
-    { label: "Go to Skills", hint: "section", action: () => go("skills") },
     { label: "Go to Contact", hint: "section", action: () => go("contact") },
     ...STORIES.map<Cmd>(s => ({ label: s.title, hint: "platform map", action: () => { selected = s.id; go("main"); } })),
     ...roles.map<Cmd>(r => ({ label: `${r.title}, ${r.org}`, hint: "role · " + r.tags.join(", "), action: () => go("experience") })),
-    ...skills.map<Cmd>(s => ({ label: s, hint: "skill", action: () => go("skills") })),
+    ...tools.map<Cmd>(s => ({ label: s, hint: "tool", action: () => go("about") })),
     { label: "LinkedIn", hint: "link · opens new tab", action: () => { window.open("https://linkedin.com/in/claire-knorr", "_blank", "noopener"); } },
     { label: "GitHub", hint: "link · opens new tab", action: () => { window.open("https://github.com/claireokay", "_blank", "noopener"); } },
     { label: "Email Claire", hint: "mailto", action: () => { location.href = "mailto:clairepknorr@gmail.com"; } },
@@ -206,7 +200,7 @@
   <nav class="nav" aria-label="Main">
     <a class="brand" href="/" on:click={nav}>Claire Knorr<small>Product Manager</small></a>
     <ul>
-      <li><a href="/about/" on:click={nav}>About</a></li><li><a href="/experience/" on:click={nav}>Experience</a></li><li><a href="/skills/" on:click={nav}>Skills</a></li>
+      <li><a href="/about/" on:click={nav}>About</a></li><li><a href="/experience/" on:click={nav}>Experience</a></li>
       <li><button class="kbd" on:click={open} aria-keyshortcuts="Control+K Meta+K" aria-haspopup="dialog"><span>Search</span><kbd aria-hidden="true">{isMac ? "⌘K" : "Ctrl K"}</kbd></button></li>
       <li class="soc"><a href="https://linkedin.com/in/claire-knorr" target="_blank" rel="noopener noreferrer">LinkedIn</a></li>
       <li class="soc"><a href="https://github.com/claireokay" target="_blank" rel="noopener noreferrer">GitHub</a></li>
@@ -279,6 +273,8 @@
       <h2>Systems that meet people</h2>
       <p>I started as a software engineer intern, then realized my favorite part was deciding <em>what</em> to build and <em>why</em>. Today I own licensing and activation for cybersecurity products, and a Disability Studies minor shapes how I write requirements.</p>
       <ul class="chips"><li>B.S. Information Science, UMD</li><li>Magna Cum Laude</li><li>GPA 3.965 / 4.00</li><li>Grace Hopper Scholar</li></ul>
+      <p class="tools"><strong>Tools:</strong> {tools.join(" · ")}</p>
+      <p class="tools"><strong>Outside of work:</strong> I love exploring San Francisco, trying good coffee, going hiking, and reading by the beach.</p>
     </div>
   </section>
 
@@ -312,6 +308,7 @@
       <h3>University of Maryland, College Park</h3>
       <p class="meta">B.S. Information Science, Minor in Disability Studies</p>
       <ul class="chips"><li class="ink">Magna Cum Laude</li><li>GPA 3.965 / 4.00</li><li>Grace Hopper Scholar</li></ul>
+      <p class="cert"><strong>Certified:</strong> Palo Alto Networks Certified Cybersecurity Apprentice</p>
       <details class="more">
         <summary><span class="when-closed">Show awards, leadership and activities</span><span class="when-open">Hide awards, leadership and activities</span></summary>
       <dl class="rows">
@@ -328,12 +325,6 @@
     </article>
   </section>
 
-  <section id="skills" class="skills">
-    <h2>Skills</h2>
-    {#each skillGroups as g}<h3 class="grp">{g.name}</h3><ul class="chips big">{#each g.items as s}<li>{s}</li>{/each}</ul>{/each}
-    <h2 class="outside">Outside of work</h2>
-    <p class="lede">I love exploring San Francisco, trying good coffee, going hiking, and reading by the beach.</p>
-  </section>
 
   <section id="contact" class="contact">
     <h2>Hiring a product manager?</h2>
@@ -351,7 +342,7 @@
   <div class="scrim" on:click={close}>
     <div class="palette" role="dialog" aria-modal="true" aria-labelledby="pal-title" tabindex="-1" on:click|stopPropagation>
       <h2 id="pal-title" class="sr">Search this site</h2>
-      <input bind:this={input} bind:value={query} placeholder="Search roles, skills, sections…" aria-label="Search roles, skills, sections"
+      <input bind:this={input} bind:value={query} placeholder="Search roles, tools, sections…" aria-label="Search roles, tools, sections"
         role="combobox" aria-expanded="true" aria-controls="pal-list" aria-autocomplete="list" aria-activedescendant={results[sel] ? "opt-" + sel : undefined} />
       <ul id="pal-list" role="listbox" aria-label="Results">
         {#each results as c, i}
@@ -396,9 +387,9 @@
   .card ul:not(.chips) { padding-left: 1.1rem; list-style: disc; font-size: .98rem; } .card li { margin-bottom: .45rem; }
   .chips { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: 1rem; }
   .chips li { list-style: none; background: var(--lilac-wash); border: 1.5px solid var(--line); border-radius: 999px; padding: .2rem .75rem; font-weight: 700; font-size: .85rem; margin: 0; }
-  .chips.big li { font-size: 1rem; padding: .4rem 1rem; background: #fff; }
+ 
   :global(.redacted) { background: var(--plum); color: var(--lilac); border-radius: 6px; font-weight: 700; padding: 0 .35rem; user-select: none; }
-  .skills, .contact { width: min(100% - 2.5rem, 1180px); margin: 0 auto; padding: 6rem 0 3rem; }
+  .contact { width: min(100% - 2.5rem, 1180px); margin: 0 auto; padding: 6rem 0 3rem; }
   .contact { text-align: center; padding-bottom: 6rem; } .contact p { color: var(--plum-soft); }
   .scrim { position: fixed; inset: 0; background: rgba(45,27,78,.35); backdrop-filter: blur(4px); z-index: 50; display: grid; place-items: start center; padding-top: 14vh; }
   .palette { width: min(92vw, 560px); background: #fff; border: 2px solid var(--plum); border-radius: 22px; box-shadow: 0 10px 0 var(--lilac); overflow: hidden; }
@@ -430,13 +421,13 @@
   @media (max-width: 899px) { .nav li.soc { display: none; } }
 
   .wrap { width: min(100% - 2.5rem, 1180px); margin: 0 auto; }
-  .values { padding: 1rem 0 5rem; } .values h2, .edu h2, .skills h2 { margin-bottom: 1.5rem; }
+  .values { padding: 1rem 0 5rem; } .values h2, .edu h2 { margin-bottom: 1.5rem; }
   .values ul { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.25rem; }
   .values li { background: #fff; border: 2px solid var(--line); border-radius: 24px; padding: 1.25rem 1.4rem; } .values h3 { font-size: 1.15rem; margin-bottom: .4rem; } .values p { margin: 0; color: var(--plum-soft); font-size: .98rem; }
   .edu { padding: 5rem 0 2rem; } .panel2 { background: #fff; border: 2px solid var(--plum); border-radius: 28px; padding: 1.75rem; box-shadow: 0 8px 0 var(--lilac); }
   .panel2 .meta { margin: .25rem 0 1rem; color: var(--plum-soft); font-weight: 600; }
   :global(.chips li.ink) { background: var(--plum); color: #fff; border-color: var(--plum); }
-  .grp { font-size: 1.05rem; margin: 1.25rem 0 .1rem; } .outside { margin-top: 3.5rem; } .skills .lede { margin-top: .5rem; }
+  
   .foot { text-align: center; padding: 2rem 1rem 3rem; color: var(--plum-soft); font-weight: 600; border-top: 1px solid var(--line); }
   @media (max-width: 760px) { }
   .card.wide { width: min(92vw, 940px); } .card.wide ul:not(.chips) { columns: 2; column-gap: 1.75rem; } .card.wide li { break-inside: avoid; }
@@ -486,6 +477,8 @@
   .ctrls { display: inline-flex; align-items: center; gap: .5rem; }
   .pausebtn { display: inline-flex; align-items: center; gap: .4rem; font: inherit; font-weight: 700; font-size: .85rem; padding: .2rem .8rem; border: 2px solid var(--plum); border-radius: 999px; background: #fff; color: var(--plum); cursor: pointer; }
   .pausebtn:hover { background: var(--lilac-wash); }
-  .pausebtn.under { margin: 1.6rem 0 0 .5rem; }
+  .pausebtn.under { margin: 2.4rem 0 0 .5rem; }
   .map.fixed { display: flex; flex-direction: column; } .map.fixed .plwrap { flex: 1; min-height: 0; overflow-y: auto; } .map.fixed .note { flex: none; margin-bottom: .6rem; }
+  .tools { margin: .9rem 0 0; font-size: 1rem; color: var(--plum-soft); } .tools strong { color: var(--plum); }
+  .cert { margin: .9rem 0 0; color: var(--plum-soft); font-weight: 600; } .cert strong { color: var(--plum); }
 </style>
