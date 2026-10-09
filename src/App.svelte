@@ -112,6 +112,16 @@
   let query = "";
   let input: HTMLInputElement;
   let sel = 0;
+  let mapH = 0;
+  let boxH = 0;
+  $: if (view === "map" && boxH) mapH = boxH;
+  let paused = reduce0();
+  let view: "map" | "list" = (typeof matchMedia !== "undefined" && matchMedia("(max-width: 600px)").matches) ? "list" : "map";
+  let opener: HTMLElement | null = null;
+  let tl: gsap.core.Timeline | undefined;
+  const isMac = typeof navigator !== "undefined" && /Mac|iPhone|iPad/.test(navigator.platform);
+  function reduce0() { return typeof matchMedia !== "undefined" && matchMedia("(prefers-reduced-motion: reduce)").matches; }
+  $: tl && (paused ? tl.pause() : tl.play());
   const reduce = typeof matchMedia !== "undefined" && matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   function go(id: string) { document.getElementById(id)?.scrollIntoView({ behavior: reduce ? "auto" : "smooth" }); }
@@ -121,7 +131,7 @@
     { label: "Go to Education", hint: "section · awards, honors", action: () => { const d = document.querySelector<HTMLDetailsElement>(".more"); if (d) d.open = true; go("education"); } },
     { label: "Go to Skills", hint: "section", action: () => go("skills") },
     { label: "Go to Contact", hint: "section", action: () => go("contact") },
-    ...STORIES.map<Cmd>(s => ({ label: s.title, hint: "platform map", action: () => { selected = s.id; go("top"); } })),
+    ...STORIES.map<Cmd>(s => ({ label: s.title, hint: "platform map", action: () => { selected = s.id; go("main"); } })),
     ...roles.map<Cmd>(r => ({ label: `${r.title}, ${r.org}`, hint: "role · " + r.tags.join(", "), action: () => go("experience") })),
     ...skills.map<Cmd>(s => ({ label: s, hint: "skill", action: () => go("skills") })),
     { label: "LinkedIn", hint: "link · opens new tab", action: () => { window.open("https://linkedin.com/in/claire-knorr", "_blank", "noopener"); } },
@@ -131,12 +141,13 @@
   $: results = commands.filter(c => (c.label + " " + c.hint).toLowerCase().includes(query.trim().toLowerCase())).slice(0, 7);
   $: if (sel >= results.length) sel = 0;
 
-  async function open() { paletteOpen = true; query = ""; sel = 0; await tick(); input?.focus(); }
-  function close() { paletteOpen = false; }
+  async function open() { opener = document.activeElement as HTMLElement; paletteOpen = true; query = ""; sel = 0; await tick(); input?.focus(); }
+  function close() { paletteOpen = false; opener?.focus(); }
   function key(e: KeyboardEvent) {
     if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") { e.preventDefault(); paletteOpen ? close() : open(); return; }
     if (!paletteOpen) return;
     if (e.key === "Escape") close();
+    else if (e.key === "Tab") { e.preventDefault(); input?.focus(); }
     else if (e.key === "ArrowDown") { e.preventDefault(); sel = (sel + 1) % Math.max(results.length, 1); }
     else if (e.key === "ArrowUp") { e.preventDefault(); sel = (sel - 1 + results.length) % Math.max(results.length, 1); }
     else if (e.key === "Enter" && results[sel]) { results[sel].action(); close(); }
@@ -144,14 +155,13 @@
   function redact(s: string) { return s.split(/(XX[%+K]?)/g).map(p => ({ t: p, r: /^XX/.test(p) })); }
 
   onMount(() => {
-    let tl: gsap.core.Timeline | undefined;
     if (!reduce) {
       tl = gsap.timeline({ repeat: -1, yoyo: true, defaults: { duration: 3.2, ease: "sine.inOut" } });
       tl.to(blobPath, { attr: { d: shapes[1] } }).to(blobPath, { attr: { d: shapes[2] } }).to(blobPath, { attr: { d: shapes[0] } });
       gsap.from(".hero-in", { y: 24, opacity: 0, duration: 0.8, stagger: 0.12, ease: "power3.out" });
     }
     const mm = gsap.matchMedia();
-    mm.add("(min-width: 900px)", () => {
+    mm.add("(min-width: 900px) and (min-height: 800px)", () => {
       const dist = () => track.scrollWidth - window.innerWidth + 80;
       gsap.to(track, { x: () => -dist(), ease: "none", scrollTrigger: {
         trigger: pinWrap, start: "top top", end: () => "+=" + dist(), pin: true, scrub: reduce ? true : 0.6, invalidateOnRefresh: true,
@@ -163,12 +173,14 @@
 
 <svelte:window on:keydown={key} />
 
+<a class="skip" href="#main">Skip to main content</a>
+
 <header class="nav-wrap">
   <nav class="nav" aria-label="Main">
-    <a class="brand" href="#top">Claire Knorr<small>Product Manager</small></a>
+    <a class="brand" href="#main">Claire Knorr<small>Product Manager</small></a>
     <ul>
       <li><a href="#about">About</a></li><li><a href="#experience">Experience</a></li><li><a href="#skills">Skills</a></li>
-      <li><button class="kbd" on:click={open} aria-label="Open command palette"><span>Search</span><kbd>⌘K</kbd></button></li>
+      <li><button class="kbd" on:click={open} aria-keyshortcuts="Control+K Meta+K" aria-haspopup="dialog"><span>Search</span><kbd aria-hidden="true">{isMac ? "⌘K" : "Ctrl K"}</kbd></button></li>
       <li class="soc"><a href="https://linkedin.com/in/claire-knorr" target="_blank" rel="noopener noreferrer">LinkedIn</a></li>
       <li class="soc"><a href="https://github.com/claireokay" target="_blank" rel="noopener noreferrer">GitHub</a></li>
       <li><a class="cta" href="#contact">Connect</a></li>
@@ -176,21 +188,30 @@
   </nav>
 </header>
 
-<main id="top">
+<main id="main" tabindex="-1">
   <section class="hero">
     <div class="copy">
       <p class="hero-in avatar"><img src="assets/images/claire-headshot.jpg" alt="" /> Claire Knorr · open to product roles</p>
       <h1 class="hero-in">Product manager for 0-1 platforms and AI-powered enterprise workflows.</h1>
       <p class="hero-in lede">I own a licensing and credit platform at Palo Alto Networks, from usage metering to an LLM feature that summarizes activation failures and opens support cases before customers ask.</p>
-      <div class="hero-in actions"><a class="btn solid" href="#experience">See my experience</a><button class="btn" on:click={open}>Search my work <kbd>⌘K</kbd></button></div>
+      <div class="hero-in actions"><a class="btn solid" href="#experience">See my experience</a><button class="btn" on:click={open}>Search my work <kbd aria-hidden="true">{isMac ? "⌘K" : "Ctrl K"}</kbd></button></div>
     </div>
-    <div class="hero-in map" role="region" aria-label="Interactive map of the platform Claire built">
-      <div class="cap"><span>The platform I built. Pick a part.</span><span>Metrics redacted as XX</span></div>
-      <svg viewBox="0 0 {W} {H}" role="group" aria-label="Platform diagram">
+    <div class="hero-in map" class:fixed={view === "list" && mapH > 0} style={view === "list" && mapH > 0 ? `height:${mapH}px` : ""} bind:offsetHeight={boxH} role="region" aria-label="Interactive map of the platform Claire built">
+      <div class="cap"><h2 class="capt">The platform I built</h2>
+        <span class="ctrls"><button class="pausebtn" on:click={() => (paused = !paused)} aria-pressed={paused}>
+        <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">{#if paused}<path d="M4 2.5v11l9-5.5z" fill="currentColor"/>{:else}<rect x="3" y="2.5" width="3.5" height="11" rx="1" fill="currentColor"/><rect x="9.5" y="2.5" width="3.5" height="11" rx="1" fill="currentColor"/>{/if}</svg>
+        <span>{paused ? "Play" : "Pause"}<span class="sr"> animation</span></span></button><span class="seg" role="group" aria-label="View"><button aria-pressed={view === "map"} on:click={() => (view = "map")}>Map</button><button aria-pressed={view === "list"} on:click={() => (view = "list")}>List</button></span></span></div>
+      {#if view === "list"}
+        <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+        <div class="plwrap" tabindex="0" role="region" aria-label="Platform parts, scrollable"><ul class="plist">{#each gnodes as n}<li><h3>{n.title}</h3><p>{#each redact(n.text) as seg}{#if seg.r}<span class="redacted light"><span aria-hidden="true">{seg.t}</span><span class="sr">redacted figure</span></span>{:else}{seg.t}{/if}{/each}</p></li>{/each}</ul></div>
+        <p class="note">Figures are redacted. <a href="mailto:clairepknorr@gmail.com?subject=Metrics%20and%20resume%20request">Email me</a> for the specifics.</p>
+      {:else}
+      <p class="hint" id="maphint">Select a part to read about it. Use Tab to move between parts, and Enter or Space to select.</p>
+      <svg viewBox="0 0 {W} {H}" role="group" aria-label="Platform diagram" aria-describedby="maphint">
         {#each glinks as l, i}
           {@const a = l.source as GNode} {@const b = l.target as GNode} {@const hot = a.id === selected || b.id === selected}
-          <line x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke={hot ? "#7d55c7" : "#c9b3f0"} stroke-width={hot ? 3 : 2} stroke-linecap="round" stroke-dasharray={hot ? "" : "2 7"} />
-          {#if !reduce}{#each [0, 1] as k}
+          <line x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke={hot ? "#7d55c7" : "#9b80d8"} stroke-width={hot ? 3 : 2} stroke-linecap="round" stroke-dasharray={hot ? "" : "2 7"} />
+          {#if !paused}{#each [0, 1] as k}
             <circle r={hot ? 4.5 : 3.2} fill={hot ? "#2d1b4e" : "#7d55c7"} opacity={hot ? 1 : 0.7}>
               <animateMotion dur="{3 + (i % 3) * 0.6}s" begin="{-k * 1.6}s" repeatCount="indefinite" path="M{a.x},{a.y} L{b.x},{b.y}" />
             </circle>{/each}{/if}
@@ -198,8 +219,9 @@
         {#each gnodes as n, i}
           {@const sel = n.id === selected}
           <!-- svelte-ignore a11y-click-events-have-key-events -->
-          <g class="node" class:sel role="button" tabindex="0" aria-pressed={sel} aria-label={n.title} transform="translate({n.x},{n.y})" on:click={() => (selected = n.id)} on:keydown={e => nodeKey(e, n.id)}>
-            <g class="bob" style="animation-delay:{-i * 0.7}s"><g class="body">
+          <g class="node" class:sel role="button" tabindex="0" aria-pressed={sel} aria-label={n.label} transform="translate({n.x},{n.y})" on:click={() => (selected = n.id)} on:keydown={e => nodeKey(e, n.id)}>
+            <g class="bob" class:still={paused} style="animation-delay:{-i * 0.7}s"><g class="body">
+              <circle class="ring" r={n.r + 9} fill="none" stroke="#2d1b4e" stroke-width="3" stroke-dasharray="6 5" />
               <circle r={n.r} cx="0" cy={sel ? 7 : 5} fill={sel ? "#2d1b4e" : "#c9b3f0"} />
               <circle class="main" r={n.r} fill={FILL[n.tone]} stroke="#2d1b4e" stroke-width={sel ? 3.5 : 2.5} />
               {#if n.id === "platform"}<circle r={n.r - 11} fill="none" stroke="#fbf7ff" stroke-width="2" stroke-dasharray="3 6" opacity=".8" />{/if}
@@ -207,20 +229,24 @@
           </g>
         {/each}
       </svg>
-      <div class="panel" aria-live="polite"><h2>{active.title}</h2>
-        <p>{#each redact(active.text) as seg}{#if seg.r}<span class="redacted light">{seg.t}</span>{:else}{seg.t}{/if}{/each}</p>
+      <div class="panel" aria-live="polite"><h3>{active.title}</h3>
+        <p>{#each redact(active.text) as seg}{#if seg.r}<span class="redacted light"><span aria-hidden="true">{seg.t}</span><span class="sr">redacted figure</span></span>{:else}{seg.t}{/if}{/each}</p>
         <small>Want the real numbers? <a href="mailto:clairepknorr@gmail.com?subject=Metrics%20and%20resume%20request">Email me.</a></small></div>
+      {/if}
     </div>
   </section>
 
   <section id="about" class="story">
-    <div class="art" aria-hidden="true">
-      <svg viewBox="0 0 600 580">
+    <div class="art">
+      <svg viewBox="0 0 600 580" role="img" aria-label="Portrait of Claire Knorr smiling, wearing a black top with ruffled sleeves">
         <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#c9b3f0"/><stop offset="1" stop-color="#ffb8d9"/></linearGradient>
           <clipPath id="clip"><path bind:this={blobPath} d={shapes[0]} /></clipPath></defs>
         <g clip-path="url(#clip)"><rect width="600" height="580" fill="url(#g)"/>
           <image href="assets/images/claire-headshot.jpg" x="30" y="20" width="540" height="540" preserveAspectRatio="xMidYMid slice"/></g>
       </svg>
+      <button class="pausebtn under" on:click={() => (paused = !paused)} aria-pressed={paused}>
+        <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">{#if paused}<path d="M4 2.5v11l9-5.5z" fill="currentColor"/>{:else}<rect x="3" y="2.5" width="3.5" height="11" rx="1" fill="currentColor"/><rect x="9.5" y="2.5" width="3.5" height="11" rx="1" fill="currentColor"/>{/if}</svg>
+        <span>{paused ? "Play" : "Pause"}<span class="sr"> animation</span></span></button>
     </div>
     <div class="story-copy">
       <h2>Systems that meet people</h2>
@@ -237,7 +263,7 @@
   <section id="experience" class="pin" bind:this={pinWrap}>
     <div class="pin-head">
       <h2>Career</h2>
-      <p>Scroll to travel through it. Metrics are redacted as <span class="redacted">XX</span>; email for specifics.</p>
+      <p>Scroll to travel through it. Metrics are redacted as <span class="redacted"><span aria-hidden="true">XX</span><span class="sr">XX</span></span>; email for specifics.</p>
       <div class="bar" role="presentation"><i style="transform: scaleX({progress})"></i></div>
     </div>
     <div class="track" bind:this={track}>
@@ -246,7 +272,7 @@
           <p class="when">{r.when}</p>
           <h3>{r.title}</h3>
           <p class="org">{r.org}</p>
-          <ul>{#each r.points as p}<li>{#each redact(p) as seg}{#if seg.r}<span class="redacted">{seg.t}</span>{:else}{seg.t}{/if}{/each}</li>{/each}</ul>
+          <ul>{#each r.points as p}<li>{#each redact(p) as seg}{#if seg.r}<span class="redacted"><span aria-hidden="true">{seg.t}</span><span class="sr">redacted figure</span></span>{:else}{seg.t}{/if}{/each}</li>{/each}</ul>
           <ul class="chips">{#each r.tags as t}<li>{t}</li>{/each}</ul>
         </article>
       {/each}
@@ -296,15 +322,19 @@
 {#if paletteOpen}
   <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
   <div class="scrim" on:click={close}>
-    <div class="palette" role="dialog" aria-modal="true" aria-label="Command palette" tabindex="-1" on:click|stopPropagation>
-      <input bind:this={input} bind:value={query} placeholder="Search roles, skills, sections…" aria-label="Search" />
-      <ul role="listbox">
+    <div class="palette" role="dialog" aria-modal="true" aria-labelledby="pal-title" tabindex="-1" on:click|stopPropagation>
+      <h2 id="pal-title" class="sr">Search this site</h2>
+      <input bind:this={input} bind:value={query} placeholder="Search roles, skills, sections…" aria-label="Search roles, skills, sections"
+        role="combobox" aria-expanded="true" aria-controls="pal-list" aria-autocomplete="list" aria-activedescendant={results[sel] ? "opt-" + sel : undefined} />
+      <ul id="pal-list" role="listbox" aria-label="Results">
         {#each results as c, i}
-          <li role="option" aria-selected={i === sel} class:on={i === sel}>
-            <button on:click={() => { c.action(); close(); }} on:mousemove={() => (sel = i)}><span>{c.label}</span><small>{c.hint}</small></button>
-          </li>
-        {:else}<li class="none">No matches</li>{/each}
+          <!-- svelte-ignore a11y-click-events-have-key-events -->
+          <li role="option" id={"opt-" + i} aria-selected={i === sel} class:on={i === sel} on:click={() => { c.action(); close(); }} on:mousemove={() => (sel = i)}><span>{c.label}</span><small>{c.hint}</small></li>
+        {/each}
       </ul>
+      <p class="sr" role="status">{results.length ? results.length + " results" : "No matches"}</p>
+      {#if !results.length}<p class="none">No matches</p>{/if}
+      <p class="keys" aria-hidden="true">↑↓ to move · Enter to open · Esc to close</p>
     </div>
   </div>
 {/if}
@@ -346,8 +376,8 @@
   .scrim { position: fixed; inset: 0; background: rgba(45,27,78,.35); backdrop-filter: blur(4px); z-index: 50; display: grid; place-items: start center; padding-top: 14vh; }
   .palette { width: min(92vw, 560px); background: #fff; border: 2px solid var(--plum); border-radius: 22px; box-shadow: 0 10px 0 var(--lilac); overflow: hidden; }
   .palette input { width: 100%; border: 0; border-bottom: 2px solid var(--line); padding: 1rem 1.2rem; font: inherit; font-weight: 600; outline: none; color: var(--plum); }
-  .palette ul { padding: .4rem; } .palette li button { width: 100%; display: flex; justify-content: space-between; gap: 1rem; text-align: left; font: inherit; font-weight: 600; background: none; border: 0; padding: .6rem .8rem; border-radius: 12px; color: var(--plum); cursor: pointer; }
-  .palette li.on button { background: var(--lilac-wash); } .palette small { color: var(--plum-soft); font-weight: 600; text-align: right; } .none { padding: .8rem; color: var(--plum-soft); }
+  .palette ul { padding: .4rem; } 
+   .palette small { color: var(--plum-soft); font-weight: 600; text-align: right; } .none { padding: .8rem; color: var(--plum-soft); }
   @media (max-width: 899px) { .hero { grid-template-columns: 1fr; } .track { flex-direction: column; width: auto; padding: 0 1.25rem; } .card { width: auto; } .pin { height: auto; } .nav li:nth-child(-n+2) { display: none; } }
 
   .avatar { display: inline-flex; align-items: center; gap: .7rem; margin: 0 0 1.5rem; padding: .3rem .95rem .3rem .3rem; background: #fff; border: 2px solid var(--line); border-radius: 999px; font-weight: 700; }
@@ -362,7 +392,7 @@
   @keyframes bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
   .bob { animation: bob 5s ease-in-out infinite; }
   .panel { margin: .4rem .4rem .8rem; padding: 1rem 1.2rem 1.05rem; background: var(--lilac-wash); border-radius: 22px 22px 22px 8px; min-height: 8.2rem; }
-  .panel h2 { font-size: 1.3rem; margin-bottom: .35rem; } .panel p { margin: 0 0 .5rem; color: var(--plum-soft); font-size: 1rem; } .panel small { font-weight: 600; color: var(--plum-soft); }
+  .panel h3 { font-size: 1.3rem; margin-bottom: .35rem; } .panel p { margin: 0 0 .5rem; color: var(--plum-soft); font-size: 1rem; } .panel small { font-weight: 600; color: var(--plum-soft); }
   :global(.redacted.light) { background: #fff; color: var(--plum); letter-spacing: .04em; white-space: nowrap; }
   .story { display: grid; grid-template-columns: .8fr 1.2fr; gap: 3rem; align-items: center; width: min(100% - 2.5rem, 1180px); margin: 0 auto; padding: 4rem 0; }
   .story h2 { margin-bottom: 1rem; } .story p { color: var(--plum-soft); font-size: 1.1rem; }
@@ -402,5 +432,33 @@
   .entry .stat { flex: none; background: var(--lilac-wash); border: 1.5px solid var(--line); border-radius: 999px; padding: .15rem .8rem; font-weight: 700; font-size: .85rem; color: var(--plum); white-space: nowrap; }
   .row .chips { margin-top: 0; }
   @media (max-width: 760px) { .row { grid-template-columns: 1fr; gap: .6rem; } .entry { flex-direction: column; align-items: flex-start; gap: .35rem; } .entry .stat { white-space: normal; } }
-  @media (max-width: 560px) { .brand small, .kbd span { display: none; } .brand { white-space: nowrap; } }
+  @media (max-width: 560px) { .brand small { display: none; } .nav li:nth-child(-n+3) { display: none; } .kbd kbd { display: none; } .kbd { padding: .35rem .7rem; font-size: .9rem; } .nav ul { gap: .15rem; } .nav li a.cta { padding: .45rem .8rem; } .brand { font-size: 1.05rem; } .brand { white-space: nowrap; } }
+
+  .sr { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+  .skip { position: fixed; left: 1rem; top: -4rem; z-index: 100; background: var(--plum); color: #fff; padding: .7rem 1.2rem; border-radius: 999px; font-weight: 700; text-decoration: none; transition: top .15s; }
+  .skip:focus { top: 1rem; }
+  .palette li[role=option] { display: flex; justify-content: space-between; gap: 1rem; padding: .6rem .8rem; border-radius: 12px; font-weight: 600; cursor: pointer; }
+  .palette li.on { background: var(--lilac-wash); outline: 2px solid var(--plum); outline-offset: -2px; }
+  .keys { margin: 0; padding: .6rem 1rem; border-top: 2px solid var(--line); color: var(--plum-soft); font-size: .85rem; font-weight: 600; }
+ 
+  .seg { display: inline-flex; border: 2px solid var(--plum); border-radius: 999px; overflow: hidden; }
+  .seg button { font: inherit; font-weight: 700; font-size: .85rem; padding: .2rem .85rem; border: 0; background: #fff; color: var(--plum); cursor: pointer; }
+  .seg button[aria-pressed="true"] { background: var(--plum); color: #fff; }
+  .hint { margin: .1rem .6rem .3rem; font-size: .9rem; color: var(--plum-soft); font-weight: 600; }
+  .node .ring { opacity: 0; } .node:focus-visible .ring { opacity: 1; }
+  .node:focus-visible .main { stroke-width: 4; }
+  .bob.still { animation: none; }
+  .plist { display: grid; gap: .75rem; padding: .25rem .5rem; margin: .5rem 0 0; list-style: none; }
+  .plist li { background: var(--lilac-wash); border-radius: 18px; padding: .8rem 1.1rem; } .plist h3 { font-size: 1.1rem; margin-bottom: .2rem; } .plist p { margin: 0; color: var(--plum-soft); font-size: .98rem; }
+  .note { margin: .8rem 1rem 1rem; font-weight: 600; color: var(--plum-soft); font-size: .95rem; }
+  .panel a, .note a, .org, .row dt { color: var(--lilac-ink); }
+  .panel a, .note a { text-decoration: underline; text-underline-offset: 3px; }
+  @media (max-width: 899px), (max-height: 799px) { .track { flex-direction: column; width: auto; padding: 0 1.25rem; } .card, .card.wide { width: auto; } .card.wide ul:not(.chips) { columns: 1; } .pin { height: auto; min-height: 0; } }
+  .capt { font-family: var(--body); font-variation-settings: normal; font-size: .95rem; font-weight: 700; color: var(--plum-soft); }
+  @media (max-width: 420px) { .nav { width: calc(100% - 1.5rem); } .brand { font-size: .95rem; } .kbd { padding: .3rem .55rem; font-size: .85rem; } .nav li a.cta { padding: .4rem .65rem; font-size: .9rem; } }
+  .ctrls { display: inline-flex; align-items: center; gap: .5rem; }
+  .pausebtn { display: inline-flex; align-items: center; gap: .4rem; font: inherit; font-weight: 700; font-size: .85rem; padding: .2rem .8rem; border: 2px solid var(--plum); border-radius: 999px; background: #fff; color: var(--plum); cursor: pointer; }
+  .pausebtn:hover { background: var(--lilac-wash); }
+  .pausebtn.under { margin: 1.6rem 0 0 .5rem; }
+  .map.fixed { display: flex; flex-direction: column; } .map.fixed .plwrap { flex: 1; min-height: 0; overflow-y: auto; } .map.fixed .note { flex: none; margin-bottom: .6rem; }
 </style>

@@ -5,7 +5,7 @@
 @font-face { font-family: "Quicksand"; src: url(./fonts/quicksand-700.woff2) format("woff2"); font-weight: 700; font-display: swap; }
 
 :root {
-  --paper: #fbf7ff; --lilac-wash: #f1e9fd; --lilac: #c9b3f0; --lilac-deep: #7d55c7;
+  --paper: #fbf7ff; --lilac-wash: #f1e9fd; --lilac: #c9b3f0; --lilac-deep: #7d55c7; --lilac-ink: #7a52c2;
   --plum: #2d1b4e; --plum-soft: #5b4a78; --blush: #ffb8d9; --line: #e2d5f5; --white: #fff;
   --display: "Fraunces", Georgia, serif; --body: "Quicksand", system-ui, sans-serif;
 }
