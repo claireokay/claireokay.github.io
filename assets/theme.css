@@ -1,0 +1,26 @@
+/* Same palette as the live site */
+@font-face { font-family: "Fraunces"; src: url(./fonts/fraunces.woff2) format("woff2"); font-weight: 100 900; font-style: normal; font-display: swap; }
+@font-face { font-family: "Quicksand"; src: url(./fonts/quicksand-500.woff2) format("woff2"); font-weight: 500; font-display: swap; }
+@font-face { font-family: "Quicksand"; src: url(./fonts/quicksand-600.woff2) format("woff2"); font-weight: 600; font-display: swap; }
+@font-face { font-family: "Quicksand"; src: url(./fonts/quicksand-700.woff2) format("woff2"); font-weight: 700; font-display: swap; }
+
+:root {
+  --paper: #fbf7ff; --lilac-wash: #f1e9fd; --lilac: #c9b3f0; --lilac-deep: #7d55c7;
+  --plum: #2d1b4e; --plum-soft: #5b4a78; --blush: #ffb8d9; --line: #e2d5f5; --white: #fff;
+  --display: "Fraunces", Georgia, serif; --body: "Quicksand", system-ui, sans-serif;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--paper); color: var(--plum); font-family: var(--body); font-weight: 500; font-size: 1.0625rem; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+h1, h2, h3 { font-family: var(--display); font-variation-settings: "SOFT" 100, "WONK" 1; font-weight: 600; line-height: 1.12; margin: 0; }
+a { color: var(--lilac-deep); }
+:focus-visible { outline: 3px solid var(--plum); outline-offset: 3px; border-radius: 6px; }
+.nav { display: flex; align-items: center; justify-content: space-between; width: min(100% - 2.5rem, 1180px); margin: 0 auto; height: 4.25rem; position: relative; z-index: 5; }
+.brand { font-family: var(--display); font-variation-settings: "SOFT" 100; font-weight: 600; font-size: 1.2rem; display: flex; flex-direction: column; line-height: 1.1; }
+.brand small { font-family: var(--body); font-weight: 600; font-size: .8rem; color: var(--plum-soft); }
+.nav ul { display: flex; gap: .25rem; list-style: none; margin: 0; padding: 0; }
+.nav li a { display: inline-block; padding: .45rem .9rem; border-radius: 999px; color: var(--plum); text-decoration: none; font-weight: 600; }
+.nav li a[aria-current] { background: var(--lilac); }
+.nav li a.cta { background: var(--plum); color: var(--white); }
+.btn { display: inline-flex; align-items: center; gap: .5rem; padding: .8rem 1.4rem; border-radius: 999px; font: inherit; font-weight: 700; text-decoration: none; border: 2px solid var(--plum); cursor: pointer; background: transparent; color: var(--plum); }
+.btn.solid { background: var(--plum); color: var(--white); }
