@@ -308,7 +308,7 @@
       <h3>University of Maryland, College Park</h3>
       <p class="meta">B.S. Information Science, Minor in Disability Studies</p>
       <ul class="chips"><li class="ink">Magna Cum Laude</li><li>GPA 3.965 / 4.00</li><li>Grace Hopper Scholar</li></ul>
-      <p class="cert"><strong>Certified:</strong> Palo Alto Networks Certified Cybersecurity Apprentice</p>
+      <p class="cert"><strong>Certifications:</strong> Palo Alto Networks Certified Cybersecurity Practitioner · Palo Alto Networks Certified Cybersecurity Apprentice</p>
       <details class="more">
         <summary><span class="when-closed">Show awards, leadership and activities</span><span class="when-open">Hide awards, leadership and activities</span></summary>
       <dl class="rows">
