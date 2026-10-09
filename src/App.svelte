@@ -9,7 +9,7 @@
   type Role = { id: string; title: string; org: string; when: string; points: string[]; tags: string[] };
   const roles: Role[] = [
     { id: "panw", title: "Product Manager, Licensing and Activation", org: "Palo Alto Networks", when: "Aug 2025 to present",
-      points: ["Built and scaled a 0-1 credit management platform to XX cybersecurity products, XX credit currencies, and XX+ offerings (subscriptions, SaaS activations, and bundles), unlocking new revenue streams for XX+ customers at XX% activation reliability. Planning migration of XXK customers off a legacy credit model.",
+      points: ["Built and scaled a 0-1 credit management platform to XX cybersecurity products, XX credit currencies, and XX+ offerings (subscriptions, SaaS activations, and bundles), unlocking new revenue streams for XX+ customers at XX% activation reliability.",
                "Launched usage metering for credit products across XX+ activation event types, achieving XX% billing accuracy by positioning the credit platform as the activation orchestrator.",
                "Shipped an LLM feature that summarizes activation failures and proactively opens support cases, cutting MTTR by XX days and manual case creation by XX%.",
                "Led New Product Introduction and go-to-market for XX launches, aligning XX cross-functional teams (Engineering, UX, Finance, Pricing, and more).",
@@ -48,7 +48,7 @@
   const STORIES: Story[] = [
     { id: "trial", label: "Trial request", title: "Product-led growth trial", r: 30, tone: "wash", text: "Instant activation replaces a roughly XX-week approval, with automated trial value reports that tell Sales and GTM who to follow up with." },
     { id: "activation", label: "Activation", title: "Activation orchestrator", r: 34, tone: "lilac", text: "Subscriptions, SaaS activations, and bundles all activate through one flow, at XX% reliability." },
-    { id: "platform", label: "Credit platform", title: "Credit management platform", r: 52, tone: "deep", text: "A 0-1 platform shared by XX cybersecurity products, XX credit currencies, and XX+ offerings. Next up: migrating XXK customers off a legacy credit model." },
+    { id: "platform", label: "Credit platform", title: "Credit management platform", r: 52, tone: "deep", text: "A 0-1 platform shared by XX cybersecurity products, XX credit currencies, and XX+ offerings." },
     { id: "ai", label: "LLM support", title: "LLM-assisted support", r: 34, tone: "plum", text: "A generative AI feature summarizes activation failures and opens support cases before customers ask. MTTR down XX days, manual case creation down XX%." },
     { id: "metering", label: "Usage metering", title: "Usage metering", r: 36, tone: "blush", text: "Every billable event is captured at the source across XX+ activation event types, at XX% billing accuracy." },
     { id: "onboarding", label: "Onboarding", title: "Onboarding redesign", r: 30, tone: "lilac", text: "Required inputs cut from XX to XX. Activation-related support tickets fell from XX% to under XX%." },
