@@ -213,18 +213,18 @@
         <g clip-path="url(#clip)"><rect width="600" height="580" fill="url(#g)"/>
           <image href="/assets/images/claire-headshot.jpg" x="30" y="20" width="540" height="540" preserveAspectRatio="xMidYMid slice"/></g>
       </svg>
-      <button class="motion in-art" on:click={() => (paused = !paused)} aria-pressed={paused}>
-          <span class="mi" aria-hidden="true"><svg viewBox="0 0 16 16" width="12" height="12"><rect x="3.5" y="2.5" width="3" height="11" rx="1" fill="currentColor"/><rect x="9.5" y="2.5" width="3" height="11" rx="1" fill="currentColor"/></svg></span>
-          <span>Pause motion</span></button>
+      <button class="motion in-art" class:off={paused} on:click={() => (paused = !paused)}>
+          <span class="mi" aria-hidden="true"><svg viewBox="0 0 16 16" width="12" height="12">{#if paused}<path d="M4.5 2.5v11l9-5.5z" fill="currentColor"/>{:else}<rect x="3.5" y="2.5" width="3" height="11" rx="1" fill="currentColor"/><rect x="9.5" y="2.5" width="3" height="11" rx="1" fill="currentColor"/>{/if}</svg></span>
+          <span>{paused ? "Play motion" : "Pause motion"}</span></button>
     </div>
     <div class="copy">
       <h1>Claire Knorr</h1>
       <p class="role">Product Manager at Palo Alto Networks · San Francisco Bay Area</p>
       <p class="lede">I own licensing and activation for Palo Alto Networks' cybersecurity products, from the credit platform customers buy with to the usage metering behind their bills.</p>
       <div class="actions"><a class="btn solid" href="/resume.pdf" target="_blank" rel="noopener">Résumé<span class="sr"> (PDF, opens in new tab)</span></a><a class="btn" href="mailto:clairepknorr@gmail.com">Email me</a>
-        <button class="motion in-actions" on:click={() => (paused = !paused)} aria-pressed={paused}>
-          <span class="mi" aria-hidden="true"><svg viewBox="0 0 16 16" width="12" height="12"><rect x="3.5" y="2.5" width="3" height="11" rx="1" fill="currentColor"/><rect x="9.5" y="2.5" width="3" height="11" rx="1" fill="currentColor"/></svg></span>
-          <span>Pause motion</span></button></div>
+        <button class="motion in-actions" class:off={paused} on:click={() => (paused = !paused)}>
+          <span class="mi" aria-hidden="true"><svg viewBox="0 0 16 16" width="12" height="12">{#if paused}<path d="M4.5 2.5v11l9-5.5z" fill="currentColor"/>{:else}<rect x="3.5" y="2.5" width="3" height="11" rx="1" fill="currentColor"/><rect x="9.5" y="2.5" width="3" height="11" rx="1" fill="currentColor"/>{/if}</svg></span>
+          <span>{paused ? "Play motion" : "Pause motion"}</span></button></div>
     </div>
   </section>
 
@@ -267,7 +267,7 @@
     <h2>The platform I built</h2>
     <p class="sub">How the parts I work on at Palo Alto Networks connect, from a trial request through activation to billing.</p>
     <div class="map" data-view={userView} class:fixed={view === "list" && mapH > 0} style={view === "list" && mapH > 0 ? `height:${mapH}px` : ""} bind:offsetHeight={boxH} role="region" aria-label="Interactive map of the platform">
-      <div class="cap"><span class="ctrls"><button class="pausebtn" on:click={() => (paused = !paused)} aria-pressed={paused}>
+      <div class="cap"><span class="ctrls"><button class="pausebtn" on:click={() => (paused = !paused)}>
         <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">{#if paused}<path d="M4 2.5v11l9-5.5z" fill="currentColor"/>{:else}<rect x="3" y="2.5" width="3.5" height="11" rx="1" fill="currentColor"/><rect x="9.5" y="2.5" width="3.5" height="11" rx="1" fill="currentColor"/>{/if}</svg>
         <span>{paused ? "Play" : "Pause"}<span class="sr"> animation</span></span></button><span class="seg" role="group" aria-label="View"><button aria-pressed={view === "map"} on:click={() => (userView = "map")}>Map</button><button aria-pressed={view === "list"} on:click={() => (userView = "list")}>List</button></span></span></div>
       <div class="listview">
@@ -524,7 +524,7 @@
   .motion { display: inline-flex; align-items: center; gap: .55rem; min-height: 2.75rem; padding: 0 .6rem 0 .3rem; margin-left: .25rem; border: 0; background: none; font: inherit; font-weight: 700; font-size: .95rem; color: var(--plum-soft); cursor: pointer; border-radius: 999px; }
   .motion .mi { display: grid; place-items: center; width: 1.9rem; height: 1.9rem; border-radius: 50%; background: var(--lilac-wash); border: 1.5px solid var(--line); color: var(--plum); transition: background .2s, color .2s; }
   .motion:hover { color: var(--plum); } .motion:hover .mi { background: var(--lilac); }
-  .motion[aria-pressed="true"] .mi { background: var(--plum); border-color: var(--plum); color: #fff; }
+  .motion.off .mi { background: var(--plum); border-color: var(--plum); color: #fff; }
   .motion:focus-visible { outline: 3px solid var(--lilac-deep); outline-offset: 2px; }
   .motion.in-art { display: none; }
   @media (max-width: 760px) {
