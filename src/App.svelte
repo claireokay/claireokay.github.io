@@ -76,6 +76,14 @@
   $: active = gnodes.find(n => n.id === selected)!;
   const nodeKey = (e: KeyboardEvent, id: string) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); selected = id; } };
 
+  // GSAP-morphing blob: every path has the same command structure so strings tween.
+  const shapes = [
+    "M300,60 C420,40 540,130 545,260 C550,400 440,520 300,530 C160,540 55,430 55,290 C55,160 170,80 300,60 Z",
+    "M310,50 C440,70 520,170 535,290 C550,410 420,545 290,535 C150,525 70,420 70,280 C70,150 190,30 310,50 Z",
+    "M290,70 C400,30 550,150 540,280 C530,410 450,510 310,520 C170,530 40,400 60,270 C75,160 180,100 290,70 Z",
+  ];
+  let blobPath: SVGPathElement;
+  let tl: gsap.core.Timeline | undefined;
   let track: HTMLDivElement;
   let pinWrap: HTMLElement;
   let progress = 0;
@@ -93,6 +101,7 @@
   let paused = false;
   let opener: HTMLElement | null = null;
   let isMac = false;
+  $: tl && (paused ? tl.pause() : tl.play());
   const reduce = typeof matchMedia !== "undefined" && matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   const PATHS: Record<string, string> = { main: "/", about: "/about/", experience: "/experience/", certifications: "/certifications/", education: "/education/", contact: "/contact/" };
@@ -157,6 +166,10 @@
     }
     const pop = () => { const id = idFromPath(location.pathname); document.title = TITLES[id]; show(id, false); };
     addEventListener("popstate", pop);
+    if (!reduce) {
+      tl = gsap.timeline({ repeat: -1, yoyo: true, defaults: { duration: 3.2, ease: "sine.inOut" } });
+      tl.to(blobPath, { attr: { d: shapes[1] } }).to(blobPath, { attr: { d: shapes[2] } }).to(blobPath, { attr: { d: shapes[0] } });
+    }
     const mm = gsap.matchMedia();
     mm.add("(min-width: 900px) and (min-height: 800px)", () => {
       const dist = () => track.scrollWidth - window.innerWidth + 80;
@@ -164,7 +177,7 @@
         trigger: pinWrap, start: "top top", end: () => "+=" + dist(), pin: true, scrub: reduce ? true : 0.6, invalidateOnRefresh: true,
         onUpdate: s => (progress = s.progress) } });
     });
-    return () => { mq.removeEventListener("change", onMq); removeEventListener("popstate", pop); mm.revert(); ScrollTrigger.getAll().forEach(t => t.kill()); };
+    return () => { mq.removeEventListener("change", onMq); removeEventListener("popstate", pop); tl?.kill(); mm.revert(); ScrollTrigger.getAll().forEach(t => t.kill()); };
   });
 </script>
 
@@ -189,7 +202,14 @@
 
 <main id="main" tabindex="-1">
   <section class="hero">
-    <img class="portrait" src="/assets/images/claire-headshot.jpg" width="800" height="800" alt="Portrait of Claire Knorr smiling, wearing a black top with ruffled sleeves" />
+    <div class="art">
+      <svg viewBox="0 0 600 580" role="img" aria-label="Portrait of Claire Knorr smiling, wearing a black top with ruffled sleeves">
+        <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#c9b3f0"/><stop offset="1" stop-color="#ffb8d9"/></linearGradient>
+          <clipPath id="clip"><path bind:this={blobPath} d={shapes[0]} /></clipPath></defs>
+        <g clip-path="url(#clip)"><rect width="600" height="580" fill="url(#g)"/>
+          <image href="/assets/images/claire-headshot.jpg" x="30" y="20" width="540" height="540" preserveAspectRatio="xMidYMid slice"/></g>
+      </svg>
+    </div>
     <div class="copy">
       <h1>Claire Knorr</h1>
       <p class="role">Product manager at Palo Alto Networks · San Francisco Bay Area</p>
@@ -453,13 +473,13 @@
   .links .btn .ico { margin-right: .1rem; }
 
   /* Face-first top: portrait, name, one sentence, two links. */
-  .hero { display: grid; grid-template-columns: minmax(0, 300px) 1fr; align-items: center; gap: 3rem; width: min(100% - 2.5rem, 1180px); margin: 0 auto; padding: 8rem 0 1rem; }
-  .portrait { width: 100%; height: auto; aspect-ratio: 1; object-fit: cover; border-radius: 28px; display: block; }
+  .hero { display: grid; grid-template-columns: minmax(0, 380px) 1fr; align-items: center; gap: 3rem; width: min(100% - 2.5rem, 1180px); margin: 0 auto; padding: 8rem 0 1rem; }
+  .art svg { width: 100%; height: auto; display: block; filter: drop-shadow(0 14px 0 var(--lilac)); }
   h1 { font-size: clamp(2.6rem, 6vw, 4.25rem); letter-spacing: -.02em; line-height: 1.05; margin: 0 0 .6rem; }
   .role { margin: 0 0 1.1rem; font-weight: 700; color: var(--lilac-ink); font-size: 1.1rem; }
   .lede { font-size: 1.2rem; color: var(--plum-soft); max-width: 34rem; margin: 0; }
   .actions { display: flex; gap: .75rem; flex-wrap: wrap; margin-top: 1.5rem; }
-  @media (max-width: 760px) { .hero { grid-template-columns: 1fr; gap: 1.5rem; padding-top: 6rem; } .portrait { max-width: 260px; } }
+  @media (max-width: 760px) { .hero { grid-template-columns: 1fr; gap: 1.5rem; padding-top: 6rem; } .art { max-width: 300px; } }
 
   /* One spacing scale for every section. */
   .about, .plat, .certs, .edu { padding: 5rem 0 0; margin-bottom: 0; }
