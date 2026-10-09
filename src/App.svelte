@@ -8,24 +8,24 @@
   type Role = { id: string; title: string; org: string; when: string; points: string[]; tags: string[] };
   const roles: Role[] = [
     { id: "panw", title: "Product Manager, Licensing and Activation", org: "Palo Alto Networks", when: "Aug 2025 to present",
-      points: ["Built and scaled a 0-1 credit management platform to XX cybersecurity products, XX credit currencies, and XX+ offerings (subscriptions, SaaS activations, and bundles), unlocking new revenue streams for XX+ customers at XX% activation reliability.",
-               "Launched usage metering for credit products across XX+ activation event types, achieving XX% billing accuracy by positioning the credit platform as the activation orchestrator.",
-               "Shipped an LLM feature that summarizes activation failures and proactively opens support cases, cutting MTTR by XX days and manual case creation by XX%.",
-               "Led New Product Introduction and go-to-market for XX launches, aligning XX cross-functional teams (Engineering, UX, Finance, Pricing, and more).",
-               "Led a product-led growth trial flow designed to replace a roughly XX-week approval process with instant activation, with automated trial value reports for Sales and GTM.",
-               "Cut activation-related support tickets from XX% to under XX% by redesigning onboarding across XX products, reducing required inputs from XX to XX.",
-               "Conducted XX+ customer discovery interviews with network security admins, prioritizing pain points into XX net-new roadmap features."],
+      points: ["Built and scaled a 0-1 credit management platform to 9 cybersecurity products, 2 credit currencies, and 35+ offerings (subscriptions, SaaS activations, and bundles), unlocking new revenue streams for 200+ customers at 99.9% activation reliability.",
+               "Launched usage metering for credit products across 25+ activation event types, achieving 100% billing accuracy by positioning the credit platform as the activation orchestrator.",
+               "Shipped an LLM feature that summarizes activation failures and proactively opens support cases, cutting MTTR by 4 days and manual case creation by 10%.",
+               "Led New Product Introduction and go-to-market for 3 launches, aligning 8 cross-functional teams (Engineering, UX, Finance, Pricing, and more).",
+               "Led a product-led growth trial flow designed to replace a roughly 1-week approval process with instant activation, with automated trial value reports for Sales and GTM.",
+               "Cut activation-related support tickets from 10% to under 1% by redesigning onboarding across 3 products, reducing required inputs from 20 to 5.",
+               "Conducted 20+ customer discovery interviews with network security admins, prioritizing pain points into 8 net-new roadmap features."],
       tags: ["0-1 platforms", "Generative AI", "Usage metering", "Product-led growth", "Roadmapping"] },
     { id: "wmt", title: "Product Manager Intern", org: "Walmart", when: "Summer 2024",
       points: ["Authored a PRD and presented findings to leadership, driving the shipment of new ML models and metadata inputs to measure inspiration-score effectiveness.",
-               "Defined XX production metrics for a homepage inspiration score measuring personalization content, adopted by Data Science.",
-               "Validated the score against XX years of shopper click-through data in Tableau, Looker, and Excel.",
-               "Built a content prioritization framework with Data Science, Business, and Merchandising across XX+ annual campaigns."],
+               "Defined 3 production metrics for a homepage inspiration score measuring personalization content, adopted by Data Science.",
+               "Validated the score against 2 years of shopper click-through data in Tableau, Looker, and Excel.",
+               "Built a content prioritization framework with Data Science, Business, and Merchandising across 100+ annual campaigns."],
       tags: ["PRDs", "Metrics definition", "Tableau", "Looker"] },
     { id: "amex", title: "Software Engineer Intern", org: "American Express", when: "Summer 2023 and Jan 2023",
-      points: ["Led the migration of XX shell-script workflows to Python, creating a compliance automation adopted org-wide that saved XX hours of manual work daily.",
+      points: ["Led the migration of 5 shell-script workflows to Python, creating a compliance automation adopted org-wide that saved 2 hours of manual work daily.",
                "Built a React.js login authentication system for the Corporate Technology team, and drove sprint planning as technical lead on the compliance automation.",
-               "In an earlier January 2023 sprint, redesigned the interface of an internal banking tool used by XX+ employees daily, delivering a full front-end overhaul within a XX-week sprint using HTML, CSS, and JavaScript."],
+               "In an earlier January 2023 sprint, redesigned the interface of an internal banking tool used by thousands of employees daily, delivering a full front-end overhaul within a 3-week sprint using HTML, CSS, and JavaScript."],
       tags: ["Python", "React.js", "HTML/CSS", "JavaScript", "Compliance automation"] },
   ];
   const tools = ["Python", "React.js", "JavaScript", "SQL", "Tableau", "Looker", "Excel"];
@@ -45,12 +45,12 @@
   interface GNode extends Story { x: number; y: number }
   interface GLink { source: GNode; target: GNode; d: string }
   const STORIES: Story[] = [
-    { id: "trial", label: "Trial request", title: "Product-led growth trial", r: 30, tone: "wash", text: "Instant activation replaces a roughly XX-week approval, with automated trial value reports that tell Sales and GTM who to follow up with." },
-    { id: "activation", label: "Activation", title: "Activation orchestrator", r: 34, tone: "lilac", text: "Subscriptions, SaaS activations, and bundles all activate through one flow, at XX% reliability." },
-    { id: "platform", label: "Credit platform", title: "Credit management platform", r: 52, tone: "deep", text: "A 0-1 platform shared by XX cybersecurity products, XX credit currencies, and XX+ offerings." },
-    { id: "ai", label: "LLM support", title: "LLM-assisted support", r: 34, tone: "plum", text: "A generative AI feature summarizes activation failures and opens support cases before customers ask. MTTR down XX days, manual case creation down XX%." },
-    { id: "metering", label: "Usage metering", title: "Usage metering", r: 36, tone: "blush", text: "Every billable event is captured at the source across XX+ activation event types, at XX% billing accuracy." },
-    { id: "onboarding", label: "Onboarding", title: "Onboarding redesign", r: 30, tone: "lilac", text: "Required inputs cut from XX to XX. Activation-related support tickets fell from XX% to under XX%." },
+    { id: "trial", label: "Trial request", title: "Product-led growth trial", r: 30, tone: "wash", text: "Instant activation replaces a roughly 1-week approval, with automated trial value reports that tell Sales and GTM who to follow up with." },
+    { id: "activation", label: "Activation", title: "Activation orchestrator", r: 34, tone: "lilac", text: "Subscriptions, SaaS activations, and bundles all activate through one flow, at 99.9% reliability." },
+    { id: "platform", label: "Credit platform", title: "Credit management platform", r: 52, tone: "deep", text: "A 0-1 platform shared by 9 cybersecurity products, 2 credit currencies, and 35+ offerings." },
+    { id: "ai", label: "LLM support", title: "LLM-assisted support", r: 34, tone: "plum", text: "A generative AI feature summarizes activation failures and opens support cases before customers ask. MTTR down 4 days, manual case creation down 10%." },
+    { id: "metering", label: "Usage metering", title: "Usage metering", r: 36, tone: "blush", text: "Every billable event is captured at the source across 25+ activation event types, at 100% billing accuracy." },
+    { id: "onboarding", label: "Onboarding", title: "Onboarding redesign", r: 30, tone: "lilac", text: "Required inputs cut from 20 to 5. Activation-related support tickets fell from 10% to under 1%." },
   ];
 
   // Flow: Trial request -> Activation -> (Credit platform, LLM support); Credit platform -> (Usage metering, Onboarding)
@@ -162,7 +162,6 @@
     else if (e.key === "ArrowUp") { e.preventDefault(); sel = (sel - 1 + results.length) % Math.max(results.length, 1); }
     else if (e.key === "Enter" && results[sel]) { results[sel].action(); close(); }
   }
-  function redact(s: string) { return s.split(/(XX[%+K]?)/g).map(p => ({ t: p, r: /^XX/.test(p) })); }
 
   onMount(() => {
     isMac = /Mac|iPhone|iPad/.test(navigator.platform);
@@ -217,7 +216,7 @@
     </div>
     <div class="copy">
       <h1>Claire Knorr</h1>
-      <p class="role">Product manager at Palo Alto Networks · San Francisco Bay Area</p>
+      <p class="role">Product Manager at Palo Alto Networks · San Francisco Bay Area</p>
       <p class="lede">I own licensing and activation for Palo Alto Networks' cybersecurity products, from the credit platform customers buy with to the usage metering behind their bills.</p>
       <div class="actions"><a class="btn solid" href="/resume.pdf" target="_blank" rel="noopener">Résumé<span class="sr"> (PDF, opens in new tab)</span></a><a class="btn" href="mailto:clairepknorr@gmail.com">Email me</a></div>
     </div>
@@ -239,7 +238,6 @@
 
   <section id="experience" class="exp wrap">
     <h2>Career</h2>
-    <p class="sub">Metrics are redacted as <span class="redacted"><span aria-hidden="true">XX</span><span class="sr">XX</span></span>; email for specifics.</p>
     <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
     <div class="snap" bind:this={snap} on:scroll={() => (idx = curIdx())} on:keydown={snapKey} role="region" aria-label="Roles, scrollable. Use the arrow buttons or left and right arrow keys." tabindex="0">
       {#each roles as r, ri}
@@ -247,7 +245,7 @@
           <p class="when">{r.when}</p>
           <h3>{r.title}</h3>
           <p class="org">{r.org}</p>
-          <ul>{#each r.points as p}<li>{#each redact(p) as seg}{#if seg.r}<span class="redacted"><span aria-hidden="true">{seg.t}</span><span class="sr">redacted figure</span></span>{:else}{seg.t}{/if}{/each}</li>{/each}</ul>
+          <ul>{#each r.points as p}<li>{p}</li>{/each}</ul>
           <ul class="chips">{#each r.tags as t}<li>{t}</li>{/each}</ul>
         </article>
       {/each}
@@ -268,8 +266,7 @@
         <span>{paused ? "Play" : "Pause"}<span class="sr"> animation</span></span></button><span class="seg" role="group" aria-label="View"><button aria-pressed={view === "map"} on:click={() => (userView = "map")}>Map</button><button aria-pressed={view === "list"} on:click={() => (userView = "list")}>List</button></span></span></div>
       <div class="listview">
         <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
-        <div class="plwrap" tabindex="0" role="region" aria-label="Platform parts, scrollable"><ul class="plist">{#each gnodes as n}<li><h3>{n.title}</h3><p>{#each redact(n.text) as seg}{#if seg.r}<span class="redacted light"><span aria-hidden="true">{seg.t}</span><span class="sr">redacted figure</span></span>{:else}{seg.t}{/if}{/each}</p></li>{/each}</ul></div>
-        <p class="note">Figures are redacted. <a href="mailto:clairepknorr@gmail.com?subject=Metrics%20and%20resume%20request">Email me</a> for the specifics.</p>
+        <div class="plwrap" tabindex="0" role="region" aria-label="Platform parts, scrollable"><ul class="plist">{#each gnodes as n}<li><h3>{n.title}</h3><p>{n.text}</p></li>{/each}</ul></div>
       </div>
       <div class="mapview">
       <p class="sr" id="flowdesc">{FLOW_TEXT}</p>
@@ -304,8 +301,8 @@
         {/each}
       </svg>
       <div class="panel" aria-live="polite"><h3>{active.title}</h3>
-        <p>{#each redact(active.text) as seg}{#if seg.r}<span class="redacted light"><span aria-hidden="true">{seg.t}</span><span class="sr">redacted figure</span></span>{:else}{seg.t}{/if}{/each}</p>
-        <small>Want the real numbers? <a href="mailto:clairepknorr@gmail.com?subject=Metrics%20and%20resume%20request">Email me.</a></small></div>
+        <p>{active.text}</p>
+      </div>
       </div>
     </div>
   </section>
@@ -386,7 +383,6 @@
   .chips { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: 1rem; }
   .chips li { list-style: none; background: var(--lilac-wash); border: 1.5px solid var(--line); border-radius: 999px; padding: .2rem .75rem; font-weight: 700; font-size: .85rem; margin: 0; }
  
-  :global(.redacted) { background: var(--plum); color: var(--lilac); border-radius: 6px; font-weight: 700; padding: 0 .35rem; user-select: none; }
   .contact { width: min(100% - 2.5rem, 1180px); margin: 0 auto; padding: 6rem 0 3rem; }
   .contact { text-align: center; padding-bottom: 6rem; } .contact p { color: var(--plum-soft); }
   .scrim { position: fixed; inset: 0; background: rgba(45,27,78,.35); backdrop-filter: blur(4px); z-index: 50; display: grid; place-items: start center; padding-top: 14vh; }
@@ -407,7 +403,6 @@
   .bob { animation: bob 5s ease-in-out infinite; }
   .panel { margin: .4rem .4rem .8rem; padding: 1rem 1.2rem 1.05rem; background: var(--lilac-wash); border-radius: 22px 22px 22px 8px; min-height: 8.2rem; }
   .panel h3 { font-size: 1.3rem; margin-bottom: .35rem; } .panel p { margin: 0 0 .5rem; color: var(--plum-soft); font-size: 1rem; } .panel small { font-weight: 600; color: var(--plum-soft); }
-  :global(.redacted.light) { background: #fff; color: var(--plum); letter-spacing: .04em; white-space: nowrap; }
   @media (prefers-reduced-motion: reduce) { .bob { animation: none; } .node .body { transition: none; } }
   @media (max-width: 899px) { }
   .links { display: flex; gap: .75rem; justify-content: center; flex-wrap: wrap; margin-top: 1.25rem; }
