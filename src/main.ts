@@ -1,3 +1,4 @@
-import { mount } from "svelte";
+import { hydrate } from "svelte";
 import App from "./App.svelte";
-mount(App, { target: document.getElementById("app")! });
+// The page ships pre-rendered (see build.mjs); this attaches the behavior to that HTML.
+hydrate(App, { target: document.getElementById("app")! });

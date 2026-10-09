@@ -2,8 +2,9 @@
   import { onMount, tick } from "svelte";
   import { gsap } from "gsap";
   import { ScrollTrigger } from "gsap/ScrollTrigger";
-
-  gsap.registerPlugin(ScrollTrigger);
+  // Brand icons: Font Awesome Free (CC BY 4.0), https://fontawesome.com/license/free
+  import { faGithub, faLinkedin } from "@fortawesome/free-brands-svg-icons";
+  const ICONS = { github: faGithub.icon, linkedin: faLinkedin.icon };
 
   type Role = { id: string; title: string; org: string; when: string; points: string[]; tags: string[] };
   const roles: Role[] = [
@@ -110,13 +111,15 @@
   let sel = 0;
   let mapH = 0;
   let boxH = 0;
+  // Anything that depends on the browser starts at its server-safe default and is set in onMount, so the pre-rendered HTML always matches.
+  let userView: "map" | "list" | null = null;
+  let narrow = false;
+  $: view = userView ?? (narrow ? "list" : "map");
   $: if (view === "map" && boxH) mapH = boxH;
-  let paused = reduce0();
-  let view: "map" | "list" = (typeof matchMedia !== "undefined" && matchMedia("(max-width: 600px)").matches) ? "list" : "map";
+  let paused = false;
   let opener: HTMLElement | null = null;
   let tl: gsap.core.Timeline | undefined;
-  const isMac = typeof navigator !== "undefined" && /Mac|iPhone|iPad/.test(navigator.platform);
-  function reduce0() { return typeof matchMedia !== "undefined" && matchMedia("(prefers-reduced-motion: reduce)").matches; }
+  let isMac = false;
   $: tl && (paused ? tl.pause() : tl.play());
   const reduce = typeof matchMedia !== "undefined" && matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -169,6 +172,11 @@
   function redact(s: string) { return s.split(/(XX[%+K]?)/g).map(p => ({ t: p, r: /^XX/.test(p) })); }
 
   onMount(() => {
+    gsap.registerPlugin(ScrollTrigger);
+    isMac = /Mac|iPhone|iPad/.test(navigator.platform);
+    paused = reduce;
+    const mq = matchMedia("(max-width: 600px)"); narrow = mq.matches;
+    const onMq = () => (narrow = mq.matches); mq.addEventListener("change", onMq);
     const landing = idFromPath(location.pathname);
     if (landing !== "main") {
       document.title = TITLES[landing];
@@ -181,7 +189,6 @@
     if (!reduce) {
       tl = gsap.timeline({ repeat: -1, yoyo: true, defaults: { duration: 3.2, ease: "sine.inOut" } });
       tl.to(blobPath, { attr: { d: shapes[1] } }).to(blobPath, { attr: { d: shapes[2] } }).to(blobPath, { attr: { d: shapes[0] } });
-      gsap.from(".hero-in", { y: 24, opacity: 0, duration: 0.8, stagger: 0.12, ease: "power3.out" });
     }
     const mm = gsap.matchMedia();
     mm.add("(min-width: 900px) and (min-height: 800px)", () => {
@@ -190,7 +197,7 @@
         trigger: pinWrap, start: "top top", end: () => "+=" + dist(), pin: true, scrub: reduce ? true : 0.6, invalidateOnRefresh: true,
         onUpdate: s => (progress = s.progress) } });
     });
-    return () => { removeEventListener("popstate", pop); tl?.kill(); mm.revert(); ScrollTrigger.getAll().forEach(t => t.kill()); };
+    return () => { mq.removeEventListener("change", onMq); removeEventListener("popstate", pop); tl?.kill(); mm.revert(); ScrollTrigger.getAll().forEach(t => t.kill()); };
   });
 </script>
 
@@ -200,12 +207,14 @@
 
 <header class="nav-wrap">
   <nav class="nav" aria-label="Main">
-    <a class="brand" href="/" on:click={nav}>Claire Knorr<small>Product Manager</small></a>
+    <div class="left">
+      <a class="brand" href="/" on:click={nav}>Claire Knorr<small>Product Manager</small></a>
+      <button class="kbd" on:click={open} aria-keyshortcuts="Control+K Meta+K" aria-haspopup="dialog"><span>Search</span><kbd aria-hidden="true">{isMac ? "⌘K" : "Ctrl K"}</kbd></button>
+    </div>
     <ul>
       <li><a href="/about/" on:click={nav}>About</a></li><li><a href="/experience/" on:click={nav}>Experience</a></li>
-      <li><button class="kbd" on:click={open} aria-keyshortcuts="Control+K Meta+K" aria-haspopup="dialog"><span>Search</span><kbd aria-hidden="true">{isMac ? "⌘K" : "Ctrl K"}</kbd></button></li>
-      <li class="soc"><a href="https://linkedin.com/in/claire-knorr" target="_blank" rel="noopener noreferrer">LinkedIn</a></li>
-      <li class="soc"><a href="https://github.com/claireokay" target="_blank" rel="noopener noreferrer">GitHub</a></li>
+      <li class="soc"><a href="https://linkedin.com/in/claire-knorr" target="_blank" rel="noopener noreferrer"><svg class="ico" viewBox="0 0 {ICONS.linkedin[0]} {ICONS.linkedin[1]}" aria-hidden="true" focusable="false"><path d={String(ICONS.linkedin[4])} fill="currentColor" /></svg>LinkedIn</a></li>
+      <li class="soc"><a href="https://github.com/claireokay" target="_blank" rel="noopener noreferrer"><svg class="ico" viewBox="0 0 {ICONS.github[0]} {ICONS.github[1]}" aria-hidden="true" focusable="false"><path d={String(ICONS.github[4])} fill="currentColor" /></svg>GitHub</a></li>
       <li><a class="cta" href="/contact/" on:click={nav}>Connect</a></li>
     </ul>
   </nav>
@@ -214,21 +223,22 @@
 <main id="main" tabindex="-1">
   <section class="hero">
     <div class="copy">
-      <p class="hero-in avatar"><img src="/assets/images/claire-headshot.jpg" alt="" /> Claire Knorr · open to product roles</p>
+      <p class="hero-in avatar">Claire Knorr · open to product roles</p>
       <h1 class="hero-in">Product manager for 0-1 platforms and AI-powered enterprise workflows.</h1>
       <p class="hero-in lede">I own a licensing and credit platform at Palo Alto Networks, from usage metering to an LLM feature that summarizes activation failures and opens support cases before customers ask.</p>
       <div class="hero-in actions"><a class="btn solid" href="/experience/" on:click={nav}>See my experience</a><button class="btn" on:click={open}>Search my work <kbd aria-hidden="true">{isMac ? "⌘K" : "Ctrl K"}</kbd></button></div>
     </div>
-    <div class="hero-in map" class:fixed={view === "list" && mapH > 0} style={view === "list" && mapH > 0 ? `height:${mapH}px` : ""} bind:offsetHeight={boxH} role="region" aria-label="Interactive map of the platform Claire built">
+    <div class="hero-in map" data-view={userView} class:fixed={view === "list" && mapH > 0} style={view === "list" && mapH > 0 ? `height:${mapH}px` : ""} bind:offsetHeight={boxH} role="region" aria-label="Interactive map of the platform Claire built">
       <div class="cap"><h2 class="capt">The platform I built</h2>
         <span class="ctrls"><button class="pausebtn" on:click={() => (paused = !paused)} aria-pressed={paused}>
         <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">{#if paused}<path d="M4 2.5v11l9-5.5z" fill="currentColor"/>{:else}<rect x="3" y="2.5" width="3.5" height="11" rx="1" fill="currentColor"/><rect x="9.5" y="2.5" width="3.5" height="11" rx="1" fill="currentColor"/>{/if}</svg>
-        <span>{paused ? "Play" : "Pause"}<span class="sr"> animation</span></span></button><span class="seg" role="group" aria-label="View"><button aria-pressed={view === "map"} on:click={() => (view = "map")}>Map</button><button aria-pressed={view === "list"} on:click={() => (view = "list")}>List</button></span></span></div>
-      {#if view === "list"}
+        <span>{paused ? "Play" : "Pause"}<span class="sr"> animation</span></span></button><span class="seg" role="group" aria-label="View"><button aria-pressed={view === "map"} on:click={() => (userView = "map")}>Map</button><button aria-pressed={view === "list"} on:click={() => (userView = "list")}>List</button></span></span></div>
+      <div class="listview">
         <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
         <div class="plwrap" tabindex="0" role="region" aria-label="Platform parts, scrollable"><ul class="plist">{#each gnodes as n}<li><h3>{n.title}</h3><p>{#each redact(n.text) as seg}{#if seg.r}<span class="redacted light"><span aria-hidden="true">{seg.t}</span><span class="sr">redacted figure</span></span>{:else}{seg.t}{/if}{/each}</p></li>{/each}</ul></div>
         <p class="note">Figures are redacted. <a href="mailto:clairepknorr@gmail.com?subject=Metrics%20and%20resume%20request">Email me</a> for the specifics.</p>
-      {:else}
+      </div>
+      <div class="mapview">
       <p class="sr" id="flowdesc">{FLOW_TEXT}</p>
       <p class="hint" id="maphint">Select a part to read about it. Use Tab to move between parts, and Enter or Space to select.</p>
       <svg viewBox="0 0 {W} {H}" role="group" aria-label="Platform diagram" aria-describedby="maphint flowdesc">
@@ -242,7 +252,7 @@
           {#if !paused}{#each [0, 1] as k}
             {@const dur = 3 + (i % 3) * 0.5}
             <!-- Dots travel 90% of each arrow (stopping before the arrowhead) and fade in and out, so none pop or pile up on a circle. -->
-            <circle r={hot ? 4.5 : 3.5} fill={hot ? "#2d1b4e" : "#7d55c7"} stroke="#fff" stroke-width="1.5" opacity="0">
+            <circle class="dot" r={hot ? 4.5 : 3.5} fill={hot ? "#2d1b4e" : "#7d55c7"} stroke="#fff" stroke-width="1.5" opacity="0">
               <animateMotion dur="{dur}s" begin="{-(k * dur) / 2 - i * 0.7}s" repeatCount="indefinite" path={l.d} keyPoints="0;0.9" keyTimes="0;1" calcMode="linear" />
               <animate attributeName="opacity" dur="{dur}s" begin="{-(k * dur) / 2 - i * 0.7}s" repeatCount="indefinite" values="0;1;1;0" keyTimes="0;0.15;0.8;1" />
             </circle>{/each}{/if}
@@ -263,7 +273,7 @@
       <div class="panel" aria-live="polite"><h3>{active.title}</h3>
         <p>{#each redact(active.text) as seg}{#if seg.r}<span class="redacted light"><span aria-hidden="true">{seg.t}</span><span class="sr">redacted figure</span></span>{:else}{seg.t}{/if}{/each}</p>
         <small>Want the real numbers? <a href="mailto:clairepknorr@gmail.com?subject=Metrics%20and%20resume%20request">Email me.</a></small></div>
-      {/if}
+      </div>
     </div>
   </section>
 
@@ -344,8 +354,8 @@
     <h2>Hiring a product manager?</h2>
     <p>I'd like to hear about the role.</p>
     <div class="links"><a class="btn solid" href="mailto:clairepknorr@gmail.com">clairepknorr@gmail.com</a>
-      <a class="btn" href="https://linkedin.com/in/claire-knorr" target="_blank" rel="noopener noreferrer">LinkedIn ↗</a>
-      <a class="btn" href="https://github.com/claireokay" target="_blank" rel="noopener noreferrer">GitHub ↗</a></div>
+      <a class="btn" href="https://linkedin.com/in/claire-knorr" target="_blank" rel="noopener noreferrer"><svg class="ico" viewBox="0 0 {ICONS.linkedin[0]} {ICONS.linkedin[1]}" aria-hidden="true" focusable="false"><path d={String(ICONS.linkedin[4])} fill="currentColor" /></svg>LinkedIn<span class="sr"> (opens in new tab)</span></a>
+      <a class="btn" href="https://github.com/claireokay" target="_blank" rel="noopener noreferrer"><svg class="ico" viewBox="0 0 {ICONS.github[0]} {ICONS.github[1]}" aria-hidden="true" focusable="false"><path d={String(ICONS.github[4])} fill="currentColor" /></svg>GitHub<span class="sr"> (opens in new tab)</span></a></div>
   </section>
 </main>
 
@@ -412,8 +422,7 @@
    .palette small { color: var(--plum-soft); font-weight: 600; text-align: right; } .none { padding: .8rem; color: var(--plum-soft); }
   @media (max-width: 899px) { .hero { grid-template-columns: 1fr; } .track { flex-direction: column; width: auto; padding: 0 1.25rem; } .card { width: auto; } .pin { height: auto; } .nav li:nth-child(-n+2) { display: none; } }
 
-  .avatar { display: inline-flex; align-items: center; gap: .7rem; margin: 0 0 1.5rem; padding: .3rem .95rem .3rem .3rem; background: #fff; border: 2px solid var(--line); border-radius: 999px; font-weight: 700; }
-  .avatar img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; object-position: 50% 30%; }
+  .avatar { display: inline-flex; align-items: center; gap: .7rem; margin: 0 0 1.5rem; padding: .4rem 1rem; background: #fff; border: 2px solid var(--line); border-radius: 999px; font-weight: 700; }
   .map { background: #fff; border: 2px solid var(--plum); border-radius: 36px 36px 36px 10px; padding: 1rem 1rem .5rem; }
   .cap { font-weight: 700; color: var(--plum-soft); font-size: .92rem; padding: .1rem .6rem .2rem; display: flex; justify-content: space-between; gap: 1rem; }
   .map svg { width: 100%; height: auto; display: block; overflow: visible; }
@@ -498,4 +507,20 @@
   .certlist li { background: #fff; border: 2px solid var(--line); border-radius: 22px; padding: 1.1rem 1.3rem; }
   .certlist strong { display: block; line-height: 1.3; } .certlist span { display: block; margin-top: .2rem; color: var(--plum-soft); font-weight: 600; font-size: .92rem; }
   .certlist a { color: var(--lilac-ink); text-decoration: underline; text-underline-offset: 3px; }
+
+  /* Entrance is pure CSS, so it plays on first paint with no flash and no JS. */
+  @keyframes rise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+  .hero-in { animation: rise .7s cubic-bezier(.2,.8,.2,1) both; }
+  .copy > :nth-child(2) { animation-delay: .07s; } .copy > :nth-child(3) { animation-delay: .14s; } .copy > :nth-child(4) { animation-delay: .21s; } .map.hero-in { animation-delay: .18s; }
+  /* Map and list are both in the page; CSS picks which one shows, so there is no swap after load on phones. */
+  .listview { display: none; }
+  .map[data-view="list"] .mapview { display: none; } .map[data-view="list"] .listview { display: block; }
+  .map[data-view="map"] .mapview { display: block; } .map[data-view="map"] .listview { display: none; }
+  @media (max-width: 600px) { .map:not([data-view]) .mapview { display: none; } .map:not([data-view]) .listview { display: block; } }
+  .map.fixed .listview { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+  @media (prefers-reduced-motion: reduce) { .hero-in { animation: none; } .dot { display: none; } }
+  .nav .left { display: flex; align-items: center; gap: 1.25rem; min-width: 0; }
+  .ico { width: 1.05em; height: 1.05em; margin-right: .4em; vertical-align: -.14em; }
+  .nav li a .ico { margin-right: .45em; }
+  .links .btn .ico { margin-right: .1rem; }
 </style>
