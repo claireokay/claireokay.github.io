@@ -24,14 +24,12 @@
                "Validated the score against {wmtYears} years of shopper click-through data in Tableau, Looker, and Excel.",
                "Built a content prioritization framework with Data Science, Business, and Merchandising across {wmtCampaigns} annual campaigns."],
       tags: ["PRDs", "Metrics definition", "Tableau", "Looker"] },
-    { id: "amex1", title: "Software Engineer Intern", org: "American Express", when: "Summer 2023",
+    { id: "amex", title: "Software Engineer Intern", org: "American Express", when: "Jan 2023 and Summer 2023",
       points: ["Led the migration of {amexWorkflows} shell-script workflows to Python, creating a compliance automation adopted org-wide that saved {amexHoursSaved} hours of manual work daily.",
+               "Drove sprint planning as technical lead on the compliance automation.",
                "Built a React.js login authentication system for the Corporate Technology team.",
-               "Drove sprint planning as technical lead on the compliance automation."],
-      tags: ["Python", "React.js", "Agile sprints", "Compliance automation"] },
-    { id: "amex0", title: "Software Engineer Intern", org: "American Express", when: "Jan 2023",
-      points: ["Redesigned the interface of an internal banking tool used by {amexToolUsers} employees daily, delivering a full front-end overhaul within a {amexSprintWeeks}-week sprint using HTML, CSS, and JavaScript."],
-      tags: ["HTML/CSS", "JavaScript", "UI redesign"] },
+               "Redesigned the interface of an internal banking tool used by {amexToolUsers} employees daily, delivering a full front-end overhaul within a {amexSprintWeeks}-week sprint using HTML, CSS, and JavaScript."],
+      tags: ["Python", "React.js", "JavaScript", "Compliance automation", "UI redesign"] },
   ];
   const tools = ["Python", "React.js", "JavaScript", "SQL", "Tableau", "Looker", "Excel"];
 
@@ -51,12 +49,6 @@
     { t: "Guided Study Sessions (GSS)", s: "INST326" },
   ];
   const clubs = ["Alpha Lambda Delta Honor Society", "Omicron Delta Kappa Honor Society (ODK)", "Information Science FI (Female-Identifying)", "Women in Business Association", "Terps for Change", "Maryland Club Figure Skating"];
-  const values = [
-    { t: "Human-centered thinking", d: "Features ship, but experiences last. I keep the user's actual situation, not a simplified persona, at the center of every product decision." },
-    { t: "Accessibility as foundation", d: "A design constraint that makes products better for everyone. I think about it from the start, not as a retrofit." },
-    { t: "Bridge-builder", d: "At home in technical and non-technical conversations. Engineering, design, finance, sales: I translate across all of them." },
-    { t: "Fluent with AI tools", d: "I treat AI as a working tool. I've shipped an LLM feature into enterprise support and built my own Claude skills for data analysis to inform product decisions." },
-  ];
   type Cmd = { label: string; hint: string; action: () => void };
 
 
@@ -96,13 +88,6 @@
   $: active = gnodes.find(n => n.id === selected)!;
   const nodeKey = (e: KeyboardEvent, id: string) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); selected = id; } };
 
-  // GSAP-morphing blob: every path has the same command structure so strings tween.
-  const shapes = [
-    "M300,60 C420,40 540,130 545,260 C550,400 440,520 300,530 C160,540 55,430 55,290 C55,160 170,80 300,60 Z",
-    "M310,50 C440,70 520,170 535,290 C550,410 420,545 290,535 C150,525 70,420 70,280 C70,150 190,30 310,50 Z",
-    "M290,70 C400,30 550,150 540,280 C530,410 450,510 310,520 C170,530 40,400 60,270 C75,160 180,100 290,70 Z",
-  ];
-  let blobPath: SVGPathElement;
   let track: HTMLDivElement;
   let pinWrap: HTMLElement;
   let progress = 0;
@@ -119,9 +104,7 @@
   $: if (view === "map" && boxH) mapH = boxH;
   let paused = false;
   let opener: HTMLElement | null = null;
-  let tl: gsap.core.Timeline | undefined;
   let isMac = false;
-  $: tl && (paused ? tl.pause() : tl.play());
   const reduce = typeof matchMedia !== "undefined" && matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   const PATHS: Record<string, string> = { main: "/", about: "/about/", experience: "/experience/", certifications: "/certifications/", education: "/education/", contact: "/contact/" };
@@ -147,9 +130,9 @@
     { label: "Go to Experience", hint: "section", action: () => go("experience") },
     { label: "Go to About", hint: "section", action: () => go("about") },
     { label: "Go to Certifications", hint: "section · Palo Alto Networks", action: () => go("certifications") },
-    { label: "Go to Education", hint: "section · awards, honors", action: () => { const d = document.querySelector<HTMLDetailsElement>(".more"); if (d) d.open = true; go("education"); } },
+    { label: "Go to Education", hint: "section · leadership, awards", action: () => go("education") },
     { label: "Go to Contact", hint: "section", action: () => go("contact") },
-    ...STORIES.map<Cmd>(s => ({ label: s.title, hint: "platform map", action: () => { selected = s.id; go("main"); } })),
+    ...STORIES.map<Cmd>(s => ({ label: s.title, hint: "platform map", action: () => { selected = s.id; show("platform", true); } })),
     ...roles.map<Cmd>(r => ({ label: `${r.title}, ${r.org}`, hint: "role · " + r.tags.join(", "), action: () => go("experience") })),
     ...tools.map<Cmd>(s => ({ label: s, hint: "tool", action: () => go("about") })),
     { label: "LinkedIn", hint: "link · opens new tab", action: () => { window.open("https://linkedin.com/in/claire-knorr", "_blank", "noopener"); } },
@@ -186,10 +169,6 @@
     }
     const pop = () => { const id = idFromPath(location.pathname); document.title = TITLES[id]; show(id, false); };
     addEventListener("popstate", pop);
-    if (!reduce) {
-      tl = gsap.timeline({ repeat: -1, yoyo: true, defaults: { duration: 3.2, ease: "sine.inOut" } });
-      tl.to(blobPath, { attr: { d: shapes[1] } }).to(blobPath, { attr: { d: shapes[2] } }).to(blobPath, { attr: { d: shapes[0] } });
-    }
     const mm = gsap.matchMedia();
     mm.add("(min-width: 900px) and (min-height: 800px)", () => {
       const dist = () => track.scrollWidth - window.innerWidth + 80;
@@ -197,7 +176,7 @@
         trigger: pinWrap, start: "top top", end: () => "+=" + dist(), pin: true, scrub: reduce ? true : 0.6, invalidateOnRefresh: true,
         onUpdate: s => (progress = s.progress) } });
     });
-    return () => { mq.removeEventListener("change", onMq); removeEventListener("popstate", pop); tl?.kill(); mm.revert(); ScrollTrigger.getAll().forEach(t => t.kill()); };
+    return () => { mq.removeEventListener("change", onMq); removeEventListener("popstate", pop); mm.revert(); ScrollTrigger.getAll().forEach(t => t.kill()); };
   });
 </script>
 
@@ -222,13 +201,52 @@
 
 <main id="main" tabindex="-1">
   <section class="hero">
+    <img class="hero-in portrait" src="/assets/images/claire-headshot.jpg" width="800" height="800" fetchpriority="high"
+      alt="Portrait of Claire Knorr smiling, wearing a black top with ruffled sleeves">
     <div class="copy">
-      <p class="hero-in avatar">Claire Knorr · open to product roles</p>
-      <h1 class="hero-in">Product manager for 0-1 platforms and AI-powered enterprise workflows.</h1>
-      <p class="hero-in lede">I own a licensing and credit platform at Palo Alto Networks, from usage metering to an LLM feature that summarizes activation failures and opens support cases before customers ask.</p>
-      <div class="hero-in actions"><a class="btn solid" href="/experience/" on:click={nav}>See my experience</a><button class="btn" on:click={open}>Search my work <kbd aria-hidden="true">{isMac ? "⌘K" : "Ctrl K"}</kbd></button></div>
+      <h1 class="hero-in">Claire Knorr</h1>
+      <p class="hero-in role">Product manager at Palo Alto Networks · San Francisco</p>
+      <p class="hero-in lede">I own licensing and activation for Palo Alto Networks' cybersecurity products: the credit platform customers buy with, the usage metering behind their bills, and the onboarding that gets them running.</p>
+      <div class="hero-in actions">
+        <a class="btn solid" href="/resume.pdf">Résumé<span class="sr"> (PDF)</span></a>
+        <a class="btn" href="mailto:clairepknorr@gmail.com">Email me</a>
+        <a class="btn" href="https://linkedin.com/in/claire-knorr" target="_blank" rel="noopener noreferrer"><svg class="ico" viewBox="0 0 {ICONS.linkedin[0]} {ICONS.linkedin[1]}" aria-hidden="true" focusable="false"><path d={String(ICONS.linkedin[4])} fill="currentColor" /></svg>LinkedIn<span class="sr"> (opens in new tab)</span></a>
+      </div>
     </div>
-    <div class="hero-in map" data-view={userView} class:fixed={view === "list" && mapH > 0} style={view === "list" && mapH > 0 ? `height:${mapH}px` : ""} bind:offsetHeight={boxH} role="region" aria-label="Interactive map of the platform Claire built">
+  </section>
+
+  <section id="about" class="about wrap">
+    <h2>About</h2>
+    <div class="about-copy">
+      <p>I started as a software engineer intern at American Express and found that my favorite part of the job was deciding <em>what</em> to build and <em>why</em>. That's the job I have now.</p>
+      <p>I minored in Disability Studies, and it shapes how I write requirements. <mark class="todo">TODO(claire): one real example, such as a requirement you wrote differently because of it.</mark></p>
+      <p>I build my own Claude skills for data analysis and use them to inform product decisions.</p>
+      <p class="tools"><strong>Tools:</strong> {tools.join(" · ")}</p>
+      <p class="tools"><strong>Outside of work:</strong> I like exploring San Francisco, good coffee, hiking, and reading by the beach. In college I skated with Maryland Club Figure Skating. <mark class="todo">TODO(claire): swap in specifics (a favorite hike, coffee spot, what you're reading).</mark></p>
+    </div>
+  </section>
+
+  <section id="experience" class="pin" bind:this={pinWrap}>
+    <div class="pin-head">
+      <h2>Career</h2>
+      <p>Scroll to travel through it.</p>
+      <div class="bar" role="presentation"><i style="transform: scaleX({progress})"></i></div>
+    </div>
+    <div class="track" bind:this={track}>
+      {#each roles as r, ri}
+        <article class="card" class:wide={ri === 0}>
+          <p class="when">{r.when}</p>
+          <h3>{r.title}</h3>
+          <p class="org">{r.org}</p>
+          <ul>{#each r.points as p}<li>{#each fill(p) as seg}{#if seg.todo}<mark class="todo">{seg.t}</mark>{:else}{seg.t}{/if}{/each}</li>{/each}</ul>
+          <ul class="chips">{#each r.tags as t}<li>{t}</li>{/each}</ul>
+        </article>
+      {/each}
+    </div>
+  </section>
+
+  <section id="platform" class="platform wrap">
+    <div class="map" data-view={userView} class:fixed={view === "list" && mapH > 0} style={view === "list" && mapH > 0 ? `height:${mapH}px` : ""} bind:offsetHeight={boxH} role="region" aria-label="Interactive map of the platform Claire built">
       <div class="cap"><h2 class="capt">The platform I built</h2>
         <span class="ctrls"><button class="pausebtn" on:click={() => (paused = !paused)} aria-pressed={paused}>
         <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">{#if paused}<path d="M4 2.5v11l9-5.5z" fill="currentColor"/>{:else}<rect x="3" y="2.5" width="3.5" height="11" rx="1" fill="currentColor"/><rect x="9.5" y="2.5" width="3.5" height="11" rx="1" fill="currentColor"/>{/if}</svg>
@@ -275,48 +293,6 @@
     </div>
   </section>
 
-  <section id="about" class="story">
-    <div class="art">
-      <svg viewBox="0 0 600 580" role="img" aria-label="Portrait of Claire Knorr smiling, wearing a black top with ruffled sleeves">
-        <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#c9b3f0"/><stop offset="1" stop-color="#ffb8d9"/></linearGradient>
-          <clipPath id="clip"><path bind:this={blobPath} d={shapes[0]} /></clipPath></defs>
-        <g clip-path="url(#clip)"><rect width="600" height="580" fill="url(#g)"/>
-          <image href="/assets/images/claire-headshot.jpg" x="30" y="20" width="540" height="540" preserveAspectRatio="xMidYMid slice"/></g>
-      </svg>
-    </div>
-    <div class="story-copy">
-      <h2>Systems that meet people</h2>
-      <p>I started as a software engineer intern, then realized my favorite part was deciding <em>what</em> to build and <em>why</em>. Today I own licensing and activation for cybersecurity products, and a Disability Studies minor shapes how I write requirements.</p>
-      <ul class="chips"><li>B.S. Information Science, UMD</li><li>Magna Cum Laude</li><li>GPA 3.965 / 4.00</li><li>Grace Hopper Scholar</li></ul>
-      <p class="tools"><strong>Tools:</strong> {tools.join(" · ")}</p>
-      <p class="tools"><strong>Outside of work:</strong> I love exploring San Francisco, trying good coffee, going hiking, and reading by the beach.</p>
-    </div>
-  </section>
-
-  <section class="values wrap">
-    <h2>How I work</h2>
-    <ul>{#each values as v}<li><h3>{v.t}</h3><p>{v.d}</p></li>{/each}</ul>
-  </section>
-
-  <section id="experience" class="pin" bind:this={pinWrap}>
-    <div class="pin-head">
-      <h2>Career</h2>
-      <p>Scroll to travel through it.</p>
-      <div class="bar" role="presentation"><i style="transform: scaleX({progress})"></i></div>
-    </div>
-    <div class="track" bind:this={track}>
-      {#each roles as r, ri}
-        <article class="card" class:wide={ri === 0}>
-          <p class="when">{r.when}</p>
-          <h3>{r.title}</h3>
-          <p class="org">{r.org}</p>
-          <ul>{#each r.points as p}<li>{#each fill(p) as seg}{#if seg.todo}<mark class="todo">{seg.t}</mark>{:else}{seg.t}{/if}{/each}</li>{/each}</ul>
-          <ul class="chips">{#each r.tags as t}<li>{t}</li>{/each}</ul>
-        </article>
-      {/each}
-    </div>
-  </section>
-
   <section id="certifications" class="certs wrap">
     <h2>Certifications</h2>
     <ul class="certlist">
@@ -349,8 +325,8 @@
 
 
   <section id="contact" class="contact">
-    <h2>Hiring a product manager?</h2>
-    <p>I'd like to hear about the role.</p>
+    <h2>Get in touch</h2>
+    <p>Email is the best way to reach me.</p>
     <div class="links"><a class="btn solid" href="mailto:clairepknorr@gmail.com">clairepknorr@gmail.com</a>
       <a class="btn" href="https://linkedin.com/in/claire-knorr" target="_blank" rel="noopener noreferrer"><svg class="ico" viewBox="0 0 {ICONS.linkedin[0]} {ICONS.linkedin[1]}" aria-hidden="true" focusable="false"><path d={String(ICONS.linkedin[4])} fill="currentColor" /></svg>LinkedIn<span class="sr"> (opens in new tab)</span></a>
       <a class="btn" href="https://github.com/claireokay" target="_blank" rel="noopener noreferrer"><svg class="ico" viewBox="0 0 {ICONS.github[0]} {ICONS.github[1]}" aria-hidden="true" focusable="false"><path d={String(ICONS.github[4])} fill="currentColor" /></svg>GitHub<span class="sr"> (opens in new tab)</span></a></div>
@@ -391,13 +367,14 @@
   .nav li a.cta { background: var(--plum); color: #fff; }
   .kbd { font: inherit; font-weight: 600; font-size: .95rem; line-height: 1.3; display: inline-flex; gap: .5rem; align-items: center; padding: .3rem .4rem .3rem .85rem; border: 2px solid var(--line); background: #fff; border-radius: 999px; color: var(--plum-soft); cursor: pointer; }
   kbd { font-family: var(--body); font-weight: 700; font-size: .68rem; line-height: 1.5; letter-spacing: .02em; background: var(--lilac-wash); border: 1px solid var(--line); border-radius: 6px; padding: 0 .35rem; color: var(--plum-soft); }
-  .hero { min-height: 100vh; display: grid; grid-template-columns: .95fr 1.05fr; align-items: center; gap: 2rem; width: min(100% - 2.5rem, 1180px); margin: 0 auto; padding-top: 5rem; }
+  .hero { display: grid; grid-template-columns: minmax(200px, 340px) 1fr; align-items: center; gap: 3.5rem; width: min(100% - 2.5rem, 1180px); margin: 0 auto; padding: 9rem 0 5rem; }
+  .portrait { width: 100%; height: auto; aspect-ratio: 1; object-fit: cover; border-radius: 14px; display: block; }
+  .role { font-weight: 700; color: var(--lilac-ink); margin: 0 0 1rem; font-size: 1.1rem; }
   h1 { font-size: clamp(2.2rem, 4.4vw, 3.5rem); letter-spacing: -.02em; margin-bottom: 1.25rem; }
   .lede { font-size: 1.2rem; color: var(--plum-soft); max-width: 34rem; }
   .actions { display: flex; gap: .75rem; flex-wrap: wrap; margin-top: 1.75rem; }
   .btn { display: inline-flex; gap: .6rem; align-items: center; padding: .8rem 1.4rem; border-radius: 999px; border: 2px solid var(--plum); background: transparent; color: var(--plum); font: inherit; font-weight: 700; text-decoration: none; cursor: pointer; }
   .btn.solid { background: var(--plum); color: #fff; }
-  .story .art svg { width: 100%; height: auto; display: block; filter: drop-shadow(0 18px 0 var(--lilac)); }
   .pin { min-height: 100vh; background: var(--lilac-wash); overflow: hidden; padding: 6rem 0 2rem; display: flex; flex-direction: column; justify-content: center; gap: 1.5rem; }
   .pin-head { width: min(100% - 2.5rem, 1180px); margin: 0 auto; }
   .pin-head p { color: var(--plum-soft); margin: .4rem 0 1rem; }
@@ -420,7 +397,6 @@
    .palette small { color: var(--plum-soft); font-weight: 600; text-align: right; } .none { padding: .8rem; color: var(--plum-soft); }
   @media (max-width: 899px) { .hero { grid-template-columns: 1fr; } .track { flex-direction: column; width: auto; padding: 0 1.25rem; } .card { width: auto; } .pin { height: auto; } .nav li:nth-child(-n+2) { display: none; } }
 
-  .avatar { display: inline-flex; align-items: center; gap: .7rem; margin: 0 0 1.5rem; padding: .4rem 1rem; background: #fff; border: 2px solid var(--line); border-radius: 999px; font-weight: 700; }
   .map { background: #fff; border: 2px solid var(--plum); border-radius: 36px 36px 36px 10px; padding: 1rem 1rem .5rem; }
   .cap { font-weight: 700; color: var(--plum-soft); font-size: .92rem; padding: .1rem .6rem .2rem; display: flex; justify-content: space-between; gap: 1rem; }
   .map svg { width: 100%; height: auto; display: block; overflow: visible; }
@@ -432,18 +408,16 @@
   .bob { animation: bob 5s ease-in-out infinite; }
   .panel { margin: .4rem .4rem .8rem; padding: 1rem 1.2rem 1.05rem; background: var(--lilac-wash); border-radius: 22px 22px 22px 8px; min-height: 8.2rem; }
   .panel h3 { font-size: 1.3rem; margin-bottom: .35rem; } .panel p { margin: 0 0 .5rem; color: var(--plum-soft); font-size: 1rem; }
-  .story { display: grid; grid-template-columns: .8fr 1.2fr; gap: 3rem; align-items: center; width: min(100% - 2.5rem, 1180px); margin: 0 auto; padding: 4rem 0; }
-  .story h2 { margin-bottom: 1rem; } .story p { color: var(--plum-soft); font-size: 1.1rem; }
+  .about { padding: 4rem 0; } .about h2 { margin-bottom: 1rem; } .about-copy { max-width: 44rem; } .about p { color: var(--plum-soft); font-size: 1.1rem; }
   .hero h1 { font-size: clamp(2.1rem, 3.9vw, 3.15rem); }
   @media (prefers-reduced-motion: reduce) { .bob { animation: none; } .node .body { transition: none; } }
-  @media (max-width: 899px) { .story { grid-template-columns: 1fr; } }
+  @media (max-width: 760px) { .hero { grid-template-columns: 1fr; gap: 1.5rem; padding-top: 6rem; } .portrait { width: 140px; } }
   .links { display: flex; gap: .75rem; justify-content: center; flex-wrap: wrap; margin-top: 1.25rem; }
   @media (max-width: 899px) { .nav li.soc { display: none; } }
 
   .wrap { width: min(100% - 2.5rem, 1180px); margin: 0 auto; }
-  .values { padding: 1rem 0 5rem; } .values h2, .edu h2 { margin-bottom: 1.5rem; }
-  .values ul { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.25rem; }
-  .values li { background: #fff; border: 2px solid var(--line); border-radius: 24px; padding: 1.25rem 1.4rem; } .values h3 { font-size: 1.15rem; margin-bottom: .4rem; } .values p { margin: 0; color: var(--plum-soft); font-size: .98rem; }
+  .edu h2 { margin-bottom: 1.5rem; }
+  .platform { padding: 4rem 0 0; }
   .edu { padding: 5rem 0 2rem; } .panel2 { background: #fff; border: 2px solid var(--plum); border-radius: 28px; padding: 1.75rem; box-shadow: 0 8px 0 var(--lilac); }
   .panel2 .meta { margin: .25rem 0 1rem; color: var(--plum-soft); font-weight: 600; }
   :global(.chips li.ink) { background: var(--plum); color: #fff; border-color: var(--plum); }
@@ -506,7 +480,7 @@
   /* Entrance is pure CSS, so it plays on first paint with no flash and no JS. */
   @keyframes rise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
   .hero-in { animation: rise .7s cubic-bezier(.2,.8,.2,1) both; }
-  .copy > :nth-child(2) { animation-delay: .07s; } .copy > :nth-child(3) { animation-delay: .14s; } .copy > :nth-child(4) { animation-delay: .21s; } .map.hero-in { animation-delay: .18s; }
+  .copy > :nth-child(2) { animation-delay: .07s; } .copy > :nth-child(3) { animation-delay: .14s; } .copy > :nth-child(4) { animation-delay: .21s; } .portrait.hero-in { animation-delay: .1s; }
   /* Map and list are both in the page; CSS picks which one shows, so there is no swap after load on phones. */
   .listview { display: none; }
   .map[data-view="list"] .mapview { display: none; } .map[data-view="list"] .listview { display: block; }
@@ -514,6 +488,7 @@
   @media (max-width: 600px) { .map:not([data-view]) .mapview { display: none; } .map:not([data-view]) .listview { display: block; } }
   .map.fixed .listview { display: flex; flex-direction: column; flex: 1; min-height: 0; }
   @media (prefers-reduced-motion: reduce) { .hero-in { animation: none; } .dot { display: none; } }
+  @media (hover: none), (pointer: coarse) { .kbd kbd { display: none; } .kbd { padding: .3rem .85rem; } }
   .nav .left { display: flex; align-items: center; gap: 1.25rem; min-width: 0; }
   .ico { width: 1.05em; height: 1.05em; margin-right: .4em; vertical-align: -.14em; }
   .nav li a .ico { margin-right: .45em; }
