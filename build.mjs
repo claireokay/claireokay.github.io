@@ -1,3 +1,4 @@
+import crypto from "node:crypto";
 // Builds src/ into the files GitHub Pages serves from the repo root:
 // index.html, assets/site.js, assets/theme.css, assets/fonts/*
 import esbuild from "esbuild";
@@ -23,7 +24,11 @@ await esbuild.build({
 });
 
 // Pre-rendered HTML: the page paints immediately with real content, then site.js hydrates it.
-const home = fs.readFileSync("src/index.html", "utf8").replace('<div id="app"></div>', `<div id="app">${body}</div>`);
+// Version the asset URLs by content hash so a browser never pairs a new page with an old stylesheet or script.
+const ver = f => crypto.createHash("md5").update(fs.readFileSync(f)).digest("hex").slice(0, 8);
+let tpl = fs.readFileSync("src/index.html", "utf8");
+for (const f of ["assets/theme.css", "assets/site.css", "assets/site.js"]) tpl = tpl.replace(`/${f}"`, `/${f}?v=${ver(f)}"`);
+const home = tpl.replace('<div id="app"></div>', `<div id="app">${body}</div>`);
 fs.writeFileSync("index.html", home);
 // Real pages at clean URLs (/about/, /experience/, ...) so direct links and refreshes return 200, not a 404 redirect.
 const pages = { about: "About", experience: "Experience", certifications: "Certifications", education: "Education", contact: "Contact" };
