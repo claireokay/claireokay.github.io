@@ -6,7 +6,7 @@ import fs from "node:fs";
 
 fs.mkdirSync("assets/fonts", { recursive: true });
 fs.copyFileSync("node_modules/@fontsource-variable/fraunces/files/fraunces-latin-full-normal.woff2", "assets/fonts/fraunces.woff2");
-for (const w of [500, 600, 700]) fs.copyFileSync(`node_modules/@fontsource/quicksand/files/quicksand-latin-${w}-normal.woff2`, `assets/fonts/quicksand-${w}.woff2`);
+fs.copyFileSync("node_modules/@fontsource-variable/atkinson-hyperlegible-next/files/atkinson-hyperlegible-next-latin-wght-normal.woff2", "assets/fonts/atkinson-hyperlegible-next.woff2");
 fs.copyFileSync("src/theme.css", "assets/theme.css");
 const ssrPlugin = () => sveltePlugin({ compilerOptions: { generate: "server", css: "external" } });
 fs.mkdirSync(".build", { recursive: true });
