@@ -33,22 +33,12 @@
   ];
   const tools = ["Python", "React.js", "JavaScript", "SQL", "Tableau", "Looker", "Excel"];
 
-  const awards = [
-    { t: "Outstanding Student Employee Recipient", s: "Division of Student Affairs", n: "Selected from 2100 employees" },
-    { t: "Outstanding Customer Service Award", s: "Department of Resident Life", n: "Selected from over 200 resident assistants" },
-    { t: "South Hill & Leonardtown Community Resident Assistant of the Year", s: "Department of Resident Life", n: "Selected from 40 resident assistants" },
-  ];
-  const work = [
-    { t: "Resident Assistant", s: "Resident Life" },
-    { t: "Welcome Desk Student Manager", s: "Conferences and Visitor Services", n: "Promoted from Visitor Services Assistant" },
-    { t: "Hospitality Assistant", s: "Conferences and Visitor Services" },
-  ];
+  // Education is curated: the strongest leadership items and one award. Campus jobs, other awards and clubs are cut.
   const lead = [
-    { t: "Director", s: "Technica" },
+    { t: "Director", s: "Technica, UMD's hackathon for underrepresented genders" },
     { t: "Undergraduate Teaching Assistant", s: "CHSE205 (Disability Studies)" },
-    { t: "Guided Study Sessions (GSS)", s: "INST326" },
   ];
-  const clubs = ["Alpha Lambda Delta Honor Society", "Omicron Delta Kappa Honor Society (ODK)", "Information Science FI (Female-Identifying)", "Women in Business Association", "Terps for Change", "Maryland Club Figure Skating"];
+  const award = { t: "Outstanding Student Employee", s: "Division of Student Affairs", n: "Selected from 2,100 employees" };
   type Cmd = { label: string; hint: string; action: () => void };
 
 
@@ -110,7 +100,6 @@
   const TITLES: Record<string, string> = { main: "Claire Knorr | Product Manager", about: "About | Claire Knorr", experience: "Experience | Claire Knorr", certifications: "Certifications | Claire Knorr", education: "Education | Claire Knorr", contact: "Contact | Claire Knorr" };
   const idFromPath = (p: string) => Object.keys(PATHS).find(k => PATHS[k] === (p.endsWith("/") ? p : p + "/")) ?? "main";
   function show(id: string, smooth: boolean) {
-    if (id === "education") { const d = document.querySelector<HTMLDetailsElement>(".more"); if (d) d.open = true; }
     const behavior = smooth && !reduce ? "smooth" : "auto";
     if (id === "main") window.scrollTo({ top: 0, behavior }); else document.getElementById(id)?.scrollIntoView({ behavior });
   }
@@ -217,10 +206,10 @@
       <button class="kbd" on:click={open} aria-keyshortcuts="Control+K Meta+K" aria-haspopup="dialog"><span>Search</span><kbd aria-hidden="true">{isMac ? "⌘K" : "Ctrl K"}</kbd></button>
     </div>
     <ul>
-      <li><a href="/about/" on:click={nav}>About</a></li><li><a href="/experience/" on:click={nav}>Experience</a></li>
+      <li><a href="/about/" on:click={nav}>About</a></li><li><a href="/experience/" on:click={nav}>Experience</a></li><li><a href="/education/" on:click={nav}>Education</a></li>
       <li class="soc"><a href="https://linkedin.com/in/claire-knorr" target="_blank" rel="noopener noreferrer"><svg class="ico" viewBox="0 0 {ICONS.linkedin[0]} {ICONS.linkedin[1]}" aria-hidden="true" focusable="false"><path d={String(ICONS.linkedin[4])} fill="currentColor" /></svg>LinkedIn</a></li>
       <li class="soc"><a href="https://github.com/claireokay" target="_blank" rel="noopener noreferrer"><svg class="ico" viewBox="0 0 {ICONS.github[0]} {ICONS.github[1]}" aria-hidden="true" focusable="false"><path d={String(ICONS.github[4])} fill="currentColor" /></svg>GitHub</a></li>
-      <li><a class="cta" href="/contact/" on:click={nav}>Connect</a></li>
+      <li><a class="cta" href="/contact/" on:click={nav}>Contact</a></li>
     </ul>
   </nav>
 </header>
@@ -334,20 +323,13 @@
     <article class="panel2">
       <h3>University of Maryland, College Park</h3>
       <p class="meta">B.S. Information Science, Minor in Disability Studies</p>
-      <ul class="chips"><li class="ink">Magna Cum Laude</li><li>GPA 3.965 / 4.00</li><li>Grace Hopper Scholar</li></ul>
-      <details class="more">
-        <summary><span class="when-closed">Show awards, leadership and activities</span><span class="when-open">Hide awards, leadership and activities</span></summary>
+      <p class="honors">Magna Cum Laude · GPA 3.965 / 4.00 · Grace Hopper Scholar</p>
       <dl class="rows">
-        <div class="row"><dt>Awards</dt>
-          <dd><ul>{#each awards as a}<li class="entry"><span class="main"><strong>{a.t}</strong><em>{a.s}</em></span><span class="stat">{a.n}</span></li>{/each}</ul></dd></div>
         <div class="row"><dt>Leadership and teaching</dt>
           <dd><ul>{#each lead as a}<li class="entry"><span class="main"><strong>{a.t}</strong><em>{a.s}</em></span></li>{/each}</ul></dd></div>
-        <div class="row"><dt>Work during college</dt>
-          <dd><ul>{#each work as a}<li class="entry"><span class="main"><strong>{a.t}</strong><em>{a.s}</em></span>{#if a.n}<span class="stat">{a.n}</span>{/if}</li>{/each}</ul></dd></div>
-        <div class="row"><dt>Honors and clubs</dt>
-          <dd><ul class="chips">{#each clubs as c}<li>{c}</li>{/each}</ul></dd></div>
+        <div class="row"><dt>Award</dt>
+          <dd><ul><li class="entry"><span class="main"><strong>{award.t}</strong><em>{award.s}</em></span><span class="stat">{award.n}</span></li></ul></dd></div>
       </dl>
-      </details>
     </article>
   </section>
 
@@ -427,8 +409,6 @@
   :global(.pinned) .track { flex-direction: row; align-items: stretch; width: max-content; margin: 0; padding: 0 max(1.25rem, calc((100vw - 1180px) / 2)); }
   :global(.pinned) .card { width: min(80vw, 480px); } :global(.pinned) .card.wide { width: min(92vw, 940px); }
   :global(.pinned) .card.wide .points { columns: 2; column-gap: 1.75rem; }
-  .chips { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: 1rem; }
-  .chips li { list-style: none; background: var(--lilac-wash); border: 1.5px solid var(--line); border-radius: 999px; padding: .2rem .75rem; font-weight: 700; font-size: .85rem; margin: 0; }
  
   :global(mark.todo) { background: #ffe08a; color: #4a3200; border-radius: 4px; padding: 0 .3rem; font-weight: 700; }
   .contact { width: min(100% - 2.5rem, 1180px); margin: 0 auto; padding: 6rem 0 3rem; }
@@ -438,7 +418,7 @@
   .palette input { width: 100%; border: 0; border-bottom: 2px solid var(--line); padding: 1rem 1.2rem; font: inherit; font-weight: 600; outline: none; color: var(--plum); }
   .palette ul { padding: .4rem; } 
    .palette small { color: var(--plum-soft); font-weight: 600; text-align: right; } .none { padding: .8rem; color: var(--plum-soft); }
-  @media (max-width: 899px) { .nav li:nth-child(-n+2) { display: none; } }
+  @media (max-width: 899px) { .nav li:nth-child(-n+3) { display: none; } }
 
   .map { background: #fff; border: 2px solid var(--plum); border-radius: 36px 36px 36px 10px; padding: 1rem 1rem .5rem; }
   .map svg { width: 100%; height: auto; display: block; overflow: visible; }
@@ -463,28 +443,19 @@
   @media (max-width: 899px) { .mapgrid { grid-template-columns: 1fr; } .plat-head { flex-direction: column; align-items: flex-start; } }
   .more-link { margin: .9rem 0 0; font-weight: 700; } .more-link a { color: var(--lilac-ink); text-underline-offset: 3px; }
   .edu { padding: 5rem 0 2rem; } .panel2 { background: #fff; border: 2px solid var(--plum); border-radius: 28px; padding: 1.75rem; box-shadow: 0 8px 0 var(--lilac); }
-  .panel2 .meta { margin: .25rem 0 1rem; color: var(--plum-soft); font-weight: 600; }
-  :global(.chips li.ink) { background: var(--plum); color: #fff; border-color: var(--plum); }
+  .panel2 .meta { margin: .25rem 0 .4rem; color: var(--plum-soft); font-weight: 600; } .honors { margin: 0; font-weight: 700; color: var(--plum); }
   
   .foot { text-align: center; padding: 2rem 1rem 3rem; color: var(--plum-soft); font-weight: 600; border-top: 1px solid var(--line); }
   @media (max-width: 760px) { }
-  .more { margin-top: 1.25rem; }
-  .more summary { list-style: none; cursor: pointer; display: inline-flex; align-items: center; gap: .6rem; padding: .5rem 1.1rem; border: 2px solid var(--plum); border-radius: 999px; font-weight: 700; color: var(--plum); background: #fff; }
-  .more summary::-webkit-details-marker { display: none; }
-  .more summary::after { content: ""; width: .5rem; height: .5rem; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: translateY(-2px) rotate(45deg); transition: transform .2s; }
-  .more[open] summary::after { transform: translateY(1px) rotate(-135deg); }
-  .more summary:hover { background: var(--lilac-wash); }
-  .more .when-open, .more[open] .when-closed { display: none; } .more[open] .when-open { display: inline; }
   .rows { margin: 1.5rem 0 0; border-top: 2px solid var(--line); }
   .row { display: grid; grid-template-columns: 200px 1fr; gap: 1.5rem; padding: 1.25rem 0; border-bottom: 2px solid var(--line); }
   .row:last-child { border-bottom: 0; padding-bottom: .25rem; }
   .row dt { font-family: var(--display); font-variation-settings: "SOFT" 100, "WONK" 1; font-weight: 600; font-size: 1.1rem; line-height: 1.25; color: var(--lilac-deep); }
   .row dd { margin: 0; } .row dd ul { margin: 0; padding: 0; }
-  .row dd ul:not(.chips) { display: grid; gap: .9rem; }
+  .row dd ul { display: grid; gap: .9rem; }
   .entry { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; list-style: none; }
   .entry .main strong { display: block; line-height: 1.3; } .entry .main em { display: block; font-style: normal; color: var(--plum-soft); font-weight: 600; font-size: .92rem; }
   .entry .stat { flex: none; background: var(--lilac-wash); border: 1.5px solid var(--line); border-radius: 999px; padding: .15rem .8rem; font-weight: 700; font-size: .85rem; color: var(--plum); white-space: nowrap; }
-  .row .chips { margin-top: 0; }
   @media (max-width: 760px) { .row { grid-template-columns: 1fr; gap: .6rem; } .entry { flex-direction: column; align-items: flex-start; gap: .35rem; } .entry .stat { white-space: normal; } }
   @media (max-width: 560px) { .brand small { display: none; } .nav li:nth-child(-n+3) { display: none; } .kbd kbd { display: none; } .kbd { padding: .35rem .7rem; font-size: .9rem; } .nav ul { gap: .15rem; } .nav li a.cta { padding: .45rem .8rem; } .brand { font-size: 1.05rem; } .brand { white-space: nowrap; } }
 
