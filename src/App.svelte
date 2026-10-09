@@ -8,24 +8,24 @@
   type Role = { id: string; title: string; org: string; when: string; points: string[]; tags: string[] };
   const roles: Role[] = [
     { id: "panw", title: "Product Manager, Licensing and Activation", org: "Palo Alto Networks", when: "Aug 2025 to present",
-      points: ["Built and scaled a 0-1 credit management platform to 9 cybersecurity products, 2 credit currencies, and 35+ offerings (subscriptions, SaaS activations, and bundles), unlocking new revenue streams for 200+ customers at 99.9% activation reliability.",
-               "Launched usage metering for credit products across 25+ activation event types, achieving 100% billing accuracy by positioning the credit platform as the activation orchestrator.",
-               "Shipped an LLM feature that summarizes activation failures and proactively opens support cases, cutting MTTR by 4 days and manual case creation by 10%.",
-               "Led New Product Introduction and go-to-market for 3 launches, aligning 8 cross-functional teams (Engineering, UX, Finance, Pricing, and more).",
-               "Led a product-led growth trial flow designed to replace a roughly 1-week approval process with instant activation, with automated trial value reports for Sales and GTM.",
-               "Cut activation-related support tickets from 10% to under 1% by redesigning onboarding across 3 products, reducing required inputs from 20 to 5.",
-               "Conducted 20+ customer discovery interviews with network security admins, prioritizing pain points into 8 net-new roadmap features."],
+      points: ["Built and scaled a 0-1 credit management platform across cybersecurity products, credit currencies, and offerings (subscriptions, SaaS activations, and bundles), unlocking new revenue streams for customers with highly reliable activation.",
+               "Launched usage metering for credit products, positioning the credit platform as the activation orchestrator so every billable event is captured at the source and billing stays accurate.",
+               "Shipped an LLM feature that summarizes activation failures and proactively opens support cases, resolving issues faster and reducing manual case creation.",
+               "Led New Product Introduction and go-to-market for multiple launches, aligning cross-functional teams (Engineering, UX, Finance, Pricing, and more) to bring each to market quickly.",
+               "Led a product-led growth trial flow designed to replace a lengthy approval process with instant activation, with automated trial value reports for Sales and GTM.",
+               "Sharply cut activation-related support tickets by redesigning onboarding across products, asking admins for far fewer inputs.",
+               "Conducted customer discovery interviews with network security admins, prioritizing pain points into net-new roadmap features by severity and support volume."],
       tags: ["0-1 platforms", "Generative AI", "Usage metering", "Product-led growth", "Roadmapping"] },
     { id: "wmt", title: "Product Manager Intern", org: "Walmart", when: "Summer 2024",
       points: ["Authored a PRD and presented findings to leadership, driving the shipment of new ML models and metadata inputs to measure inspiration-score effectiveness.",
-               "Defined 3 production metrics for a homepage inspiration score measuring personalization content, adopted by Data Science.",
-               "Validated the score against 2 years of shopper click-through data in Tableau, Looker, and Excel.",
-               "Built a content prioritization framework with Data Science, Business, and Merchandising across 100+ annual campaigns."],
+               "Defined the production metrics for a homepage inspiration score measuring personalization content, adopted by Data Science.",
+               "Validated the score against shopper click-through data in Tableau, Looker, and Excel.",
+               "Built a content prioritization framework with Data Science, Business, and Merchandising to guide campaign and content decisions."],
       tags: ["PRDs", "Metrics definition", "Tableau", "Looker"] },
     { id: "amex", title: "Software Engineer Intern", org: "American Express", when: "Summer 2023 and Jan 2023",
-      points: ["Led the migration of 5 shell-script workflows to Python, creating a compliance automation adopted org-wide that saved 2 hours of manual work daily.",
+      points: ["Led the migration of shell-script workflows to Python, creating a compliance automation adopted org-wide that saved hours of manual work every day.",
                "Built a React.js login authentication system for the Corporate Technology team, and drove sprint planning as technical lead on the compliance automation.",
-               "In an earlier January 2023 sprint, redesigned the interface of an internal banking tool used by thousands of employees daily, delivering a full front-end overhaul within a 3-week sprint using HTML, CSS, and JavaScript."],
+               "In an earlier January 2023 sprint, redesigned the interface of an internal banking tool used by thousands of employees daily, delivering a full front-end overhaul in a single sprint using HTML, CSS, and JavaScript."],
       tags: ["Python", "React.js", "HTML/CSS", "JavaScript", "Compliance automation"] },
   ];
   const tools = ["Python", "React.js", "JavaScript", "SQL", "Tableau", "Looker", "Excel"];
@@ -45,12 +45,12 @@
   interface GNode extends Story { x: number; y: number }
   interface GLink { source: GNode; target: GNode; d: string }
   const STORIES: Story[] = [
-    { id: "trial", label: "Trial request", title: "Product-led growth trial", r: 30, tone: "wash", text: "Instant activation replaces a roughly 1-week approval, with automated trial value reports that tell Sales and GTM who to follow up with." },
-    { id: "activation", label: "Activation", title: "Activation orchestrator", r: 34, tone: "lilac", text: "Subscriptions, SaaS activations, and bundles all activate through one flow, at 99.9% reliability." },
-    { id: "platform", label: "Credit platform", title: "Credit management platform", r: 52, tone: "deep", text: "A 0-1 platform shared by 9 cybersecurity products, 2 credit currencies, and 35+ offerings." },
-    { id: "ai", label: "LLM support", title: "LLM-assisted support", r: 34, tone: "plum", text: "A generative AI feature summarizes activation failures and opens support cases before customers ask. MTTR down 4 days, manual case creation down 10%." },
-    { id: "metering", label: "Usage metering", title: "Usage metering", r: 36, tone: "blush", text: "Every billable event is captured at the source across 25+ activation event types, at 100% billing accuracy." },
-    { id: "onboarding", label: "Onboarding", title: "Onboarding redesign", r: 30, tone: "lilac", text: "Required inputs cut from 20 to 5. Activation-related support tickets fell from 10% to under 1%." },
+    { id: "trial", label: "Trial request", title: "Product-led growth trial", r: 30, tone: "wash", text: "Instant activation replaces a lengthy approval, with automated trial value reports that tell Sales and GTM who to follow up with." },
+    { id: "activation", label: "Activation", title: "Activation orchestrator", r: 34, tone: "lilac", text: "Subscriptions, SaaS activations, and bundles all activate through one flow, reliably." },
+    { id: "platform", label: "Credit platform", title: "Credit management platform", r: 52, tone: "deep", text: "A 0-1 platform shared by cybersecurity products, credit currencies, and offerings." },
+    { id: "ai", label: "LLM support", title: "LLM-assisted support", r: 34, tone: "plum", text: "A generative AI feature summarizes activation failures and opens support cases before customers ask. Issues get resolved faster, with less manual case creation." },
+    { id: "metering", label: "Usage metering", title: "Usage metering", r: 36, tone: "blush", text: "Every billable event is captured at the source, so billing stays accurate." },
+    { id: "onboarding", label: "Onboarding", title: "Onboarding redesign", r: 30, tone: "lilac", text: "Far fewer required inputs, and a sharp drop in activation-related support tickets." },
   ];
 
   // Flow: Trial request -> Activation -> (Credit platform, LLM support); Credit platform -> (Usage metering, Onboarding)
