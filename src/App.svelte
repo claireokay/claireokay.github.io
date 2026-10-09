@@ -1,7 +1,6 @@
 <script lang="ts">
   import { onMount, tick } from "svelte";
   import { gsap } from "gsap";
-  import { forceCenter, forceCollide, forceLink, forceManyBody, forceSimulation, type SimulationLinkDatum, type SimulationNodeDatum } from "d3-force";
   import { ScrollTrigger } from "gsap/ScrollTrigger";
 
   gsap.registerPlugin(ScrollTrigger);
@@ -59,36 +58,33 @@
   type Cmd = { label: string; hint: string; action: () => void };
 
 
-  // ---- B: platform map (d3-force layout, settled once; CSS does the motion)
+  // ---- Platform map: a left-to-right flow with fixed positions; CSS does the motion
   type Tone = "deep" | "lilac" | "blush" | "plum" | "wash";
   interface Story { id: string; label: string; title: string; text: string; r: number; tone: Tone }
-  interface GNode extends Story, SimulationNodeDatum {}
-  interface GLink extends SimulationLinkDatum<GNode> { source: string | GNode; target: string | GNode }
+  interface GNode extends Story { x: number; y: number }
+  interface GLink { source: GNode; target: GNode; x1: number; y1: number; x2: number; y2: number }
   const STORIES: Story[] = [
-    { id: "platform", label: "Credit platform", title: "Credit management platform", r: 52, tone: "deep", text: "A 0-1 platform shared by XX cybersecurity products, XX credit currencies, and XX+ offerings. Next up: migrating XXK customers off a legacy credit model." },
+    { id: "trial", label: "Trial request", title: "Product-led growth trial", r: 30, tone: "wash", text: "Instant activation replaces a roughly XX-week approval, with automated trial value reports that tell Sales and GTM who to follow up with." },
     { id: "activation", label: "Activation", title: "Activation orchestrator", r: 34, tone: "lilac", text: "Subscriptions, SaaS activations, and bundles all activate through one flow, at XX% reliability." },
-    { id: "metering", label: "Usage metering", title: "Usage metering", r: 36, tone: "blush", text: "Every billable event is captured at the source across XX+ activation event types, at XX% billing accuracy." },
+    { id: "platform", label: "Credit platform", title: "Credit management platform", r: 52, tone: "deep", text: "A 0-1 platform shared by XX cybersecurity products, XX credit currencies, and XX+ offerings. Next up: migrating XXK customers off a legacy credit model." },
     { id: "ai", label: "LLM support", title: "LLM-assisted support", r: 34, tone: "plum", text: "A generative AI feature summarizes activation failures and opens support cases before customers ask. MTTR down XX days, manual case creation down XX%." },
-    { id: "trial", label: "Trial flow", title: "Product-led growth trial", r: 30, tone: "wash", text: "Instant activation replaces a roughly XX-week approval, with automated trial value reports that tell Sales and GTM who to follow up with." },
+    { id: "metering", label: "Usage metering", title: "Usage metering", r: 36, tone: "blush", text: "Every billable event is captured at the source across XX+ activation event types, at XX% billing accuracy." },
     { id: "onboarding", label: "Onboarding", title: "Onboarding redesign", r: 30, tone: "lilac", text: "Required inputs cut from XX to XX. Activation-related support tickets fell from XX% to under XX%." },
-    { id: "discovery", label: "Discovery", title: "Customer discovery", r: 28, tone: "wash", text: "XX+ interviews with network security admins became XX net-new roadmap features, ranked by severity and support volume." },
   ];
-  const EDGES: [string, string][] = [["platform","activation"],["platform","metering"],["platform","ai"],["platform","trial"],["platform","onboarding"],["discovery","platform"],["activation","metering"],["ai","activation"],["discovery","onboarding"]];
+
+  // Flow: Trial request -> Activation -> (Credit platform, LLM support); Credit platform -> (Usage metering, Onboarding)
+  const EDGES: [string, string][] = [["trial","activation"],["activation","platform"],["activation","ai"],["platform","metering"],["platform","onboarding"]];
   const FILL: Record<Tone, string> = { deep: "#7d55c7", lilac: "#c9b3f0", blush: "#ffb8d9", plum: "#2d1b4e", wash: "#f1e9fd" };
   const W = 640, H = 430;
-  function layout() {
-    const nodes: GNode[] = STORIES.map(s => ({ ...s }));
-    const links: GLink[] = EDGES.map(([source, target]) => ({ source, target }));
-    const sim = forceSimulation<GNode>(nodes)
-      .force("link", forceLink<GNode, GLink>(links).id(n => n.id).distance(135).strength(0.55))
-      .force("charge", forceManyBody<GNode>().strength(-520))
-      .force("collide", forceCollide<GNode>().radius(n => n.r + 26))
-      .force("center", forceCenter(W / 2, H / 2)).stop();
-    for (let i = 0; i < 400; i++) sim.tick();
-    for (const n of nodes) { n.x = Math.max(n.r + 14, Math.min(W - n.r - 14, n.x ?? W / 2)); n.y = Math.max(n.r + 10, Math.min(H - n.r - 26, n.y ?? H / 2)); }
-    return { nodes, links };
-  }
-  const { nodes: gnodes, links: glinks } = layout();
+  const POS: Record<string, [number, number]> = { trial: [72, 215], activation: [212, 215], platform: [380, 140], ai: [380, 330], metering: [566, 70], onboarding: [566, 215] };
+  const gnodes: GNode[] = STORIES.map(s => ({ ...s, x: POS[s.id][0], y: POS[s.id][1] }));
+  const byId = Object.fromEntries(gnodes.map(n => [n.id, n]));
+  // Arrows run from circle edge to circle edge so the heads are visible.
+  const glinks: GLink[] = EDGES.map(([a, b]) => {
+    const s = byId[a], t = byId[b], dx = t.x - s.x, dy = t.y - s.y, len = Math.hypot(dx, dy), ux = dx / len, uy = dy / len;
+    return { source: s, target: t, x1: s.x + ux * (s.r + 4), y1: s.y + uy * (s.r + 4), x2: t.x - ux * (t.r + 10), y2: t.y - uy * (t.r + 10) };
+  });
+  const FLOW_TEXT = "Flow: a trial request leads to activation. Activation leads to the credit management platform and to LLM-assisted support. The credit management platform leads to usage metering and onboarding.";
   let selected = "platform";
   $: active = gnodes.find(n => n.id === selected)!;
   const nodeKey = (e: KeyboardEvent, id: string) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); selected = id; } };
@@ -227,14 +223,19 @@
         <div class="plwrap" tabindex="0" role="region" aria-label="Platform parts, scrollable"><ul class="plist">{#each gnodes as n}<li><h3>{n.title}</h3><p>{#each redact(n.text) as seg}{#if seg.r}<span class="redacted light"><span aria-hidden="true">{seg.t}</span><span class="sr">redacted figure</span></span>{:else}{seg.t}{/if}{/each}</p></li>{/each}</ul></div>
         <p class="note">Figures are redacted. <a href="mailto:clairepknorr@gmail.com?subject=Metrics%20and%20resume%20request">Email me</a> for the specifics.</p>
       {:else}
+      <p class="sr" id="flowdesc">{FLOW_TEXT}</p>
       <p class="hint" id="maphint">Select a part to read about it. Use Tab to move between parts, and Enter or Space to select.</p>
-      <svg viewBox="0 0 {W} {H}" role="group" aria-label="Platform diagram" aria-describedby="maphint">
+      <svg viewBox="0 0 {W} {H}" role="group" aria-label="Platform diagram" aria-describedby="maphint flowdesc">
+        <defs>
+          <marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M1,1 L9,5 L1,9 Z" fill="#9b80d8"/></marker>
+          <marker id="ahh" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M1,1 L9,5 L1,9 Z" fill="#7d55c7"/></marker>
+        </defs>
         {#each glinks as l, i}
-          {@const a = l.source as GNode} {@const b = l.target as GNode} {@const hot = a.id === selected || b.id === selected}
-          <line x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke={hot ? "#7d55c7" : "#9b80d8"} stroke-width={hot ? 3 : 2} stroke-linecap="round" stroke-dasharray={hot ? "" : "2 7"} />
+          {@const hot = l.source.id === selected || l.target.id === selected}
+          <line x1={l.x1} y1={l.y1} x2={l.x2} y2={l.y2} stroke={hot ? "#7d55c7" : "#9b80d8"} stroke-width={hot ? 3 : 2} stroke-linecap="round" marker-end={hot ? "url(#ahh)" : "url(#ah)"} />
           {#if !paused}{#each [0, 1] as k}
             <circle r={hot ? 4.5 : 3.2} fill={hot ? "#2d1b4e" : "#7d55c7"} opacity={hot ? 1 : 0.7}>
-              <animateMotion dur="{3 + (i % 3) * 0.6}s" begin="{-k * 1.6}s" repeatCount="indefinite" path="M{a.x},{a.y} L{b.x},{b.y}" />
+              <animateMotion dur="{2.6 + (i % 3) * 0.5}s" begin="{-k * 1.3}s" repeatCount="indefinite" path="M{l.x1},{l.y1} L{l.x2},{l.y2}" />
             </circle>{/each}{/if}
         {/each}
         {#each gnodes as n, i}
